@@ -1,7 +1,7 @@
 <script setup>
-import { avatarText } from '@/@core/utils/formatters';
-import { VDataTable } from 'vuetify/labs/VDataTable';
-import data from '../data/datatable2';
+import { avatarText } from '@/@core/utils/formatters'
+import { VDataTable } from 'vuetify/labs/VDataTable'
+import data from '../data/datatable2'
 
 const editDialog = ref(false)
 const deleteDialog = ref(false)
@@ -21,6 +21,8 @@ const defaultItem = ref({
   status: -1,
 })
 
+const search = ref('')
+
 const options = ref({
   page: 1,
   itemsPerPage: 5,
@@ -32,7 +34,6 @@ const editedItem = ref(defaultItem.value)
 const editedIndex = ref(-1)
 const userList = ref(data)
 
-// status options
 const selectedOptions = [
   {
     text: 'Current',
@@ -154,7 +155,6 @@ const deleteItemConfirm = () => {
 }
 
 watch(options, newVal => {
-  console.log(options.value.itemsPerPage)
   if (newVal.itemsPerPage <= 0) {
     options.value.itemsPerPage = 1
   }
@@ -162,61 +162,72 @@ watch(options, newVal => {
 </script>
 
 <template>
-  <!-- 👉 Datatable  -->
-  <VDataTable :headers="headers" :items="userList" :items-per-page="options.itemsPerPage" :page="options.page"
-    @update:options="options = $event">
-    <!-- full name -->
-    <template #item.full_name="{ item }">
-      <div class="d-flex align-center">
-        <!-- avatar -->
-        <VAvatar size="32" :color="item.raw.avatar ? '' : 'primary'"
-          :class="item.raw.avatar ? '' : 'v-avatar-light-bg primary--text'"
-          :variant="!item.raw.avatar ? 'tonal' : undefined">
-          <VImg v-if="item.raw.avatar" :src="item.raw.avatar" />
-          <span v-else>{{ avatarText(item.raw.full_name) }}</span>
-        </VAvatar>
+  <div>
+    <div class="me-3 d-flex gap-3">
 
-        <div class="d-flex flex-column ms-3">
-          <span class="d-block font-weight-medium text--primary text-truncate">{{ item.raw.full_name }}</span>
-          <small>{{ item.raw.post }}</small>
+      <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
+        Crear Nuevo Checklist
+      </VBtn>
+    </div>
+    <VRow>
+      <VCol cols="12" offset-md="8" md="4">
+        <AppTextField v-model="search" density="compact" placeholder="Buscar" append-inner-icon="tabler-search"
+          single-line hide-details dense outlined />
+      </VCol>
+    </VRow>
+    <VDataTable :headers="headers" :items="userList" :items-per-page="options.itemsPerPage" :page="options.page"
+      :search="search" @update:options="options = $event">
+      <template #item.full_name="{ item }">
+        <div class="d-flex align-center">
+          <VAvatar size="32" :color="item.raw.avatar ? '' : 'primary'"
+            :class="item.raw.avatar ? '' : 'v-avatar-light-bg primary--text'"
+            :variant="!item.raw.avatar ? 'tonal' : undefined">
+            <VImg v-if="item.raw.avatar" :src="item.raw.avatar" />
+            <span v-else>{{ avatarText(item.raw.full_name) }}</span>
+          </VAvatar>
+
+          <div class="d-flex flex-column ms-3">
+            <span class="d-block font-weight-medium text--primary text-truncate">{{ item.raw.full_name }}</span>
+            <small>{{ item.raw.post }}</small>
+          </div>
         </div>
-      </div>
-    </template>
+      </template>
 
-    <!-- status -->
-    <template #item.status="{ item }">
-      <VChip :color="resolveStatusVariant(item.raw.status).color" size="small">
-        {{ resolveStatusVariant(item.raw.status).text }}
-      </VChip>
-    </template>
+      <!-- status -->
+      <template #item.status="{ item }">
+        <VChip :color="resolveStatusVariant(item.raw.status).color" size="small">
+          {{ resolveStatusVariant(item.raw.status).text }}
+        </VChip>
+      </template>
 
-    <!-- Actions -->
-    <template #item.actions="{ item }">
-      <div class="d-flex gap-1">
-        <IconBtn @click="editItem(item.raw)">
-          <VIcon icon="mdi-pencil-outline" />
-        </IconBtn>
-        <IconBtn @click="deleteItem(item.raw)">
-          <VIcon icon="mdi-delete-outline" />
-        </IconBtn>
-      </div>
-    </template>
-    <template #bottom>
-      <VCardText class="pt-2">
-        <VRow>
-          <VCol lg="2" cols="3">
-            <VTextField v-model="options.itemsPerPage" label="Items por página:" type="number" min="1" max="15"
-              hide-details variant="underlined" />
-          </VCol>
+      <!-- Actions -->
+      <template #item.actions="{ item }">
+        <div class="d-flex gap-1">
+          <IconBtn @click="editItem(item.raw)">
+            <VIcon icon="mdi-pencil-outline" />
+          </IconBtn>
+          <IconBtn @click="deleteItem(item.raw)">
+            <VIcon icon="mdi-delete-outline" />
+          </IconBtn>
+        </div>
+      </template>
+      <template #bottom>
+        <VCardText class="pt-2">
+          <VRow>
+            <VCol lg="2" cols="3">
+              <VTextField v-model="options.itemsPerPage" label="Items por página:" type="number" min="1" max="15"
+                hide-details variant="underlined" />
+            </VCol>
 
-          <VCol lg="10" cols="9" class="d-flex justify-end">
-            <VPagination v-model="options.page" total-visible="5"
-              :length="Math.ceil(userList.length / options.itemsPerPage)" />
-          </VCol>
-        </VRow>
-      </VCardText>
-    </template>
-  </VDataTable>
+            <VCol lg="10" cols="9" class="d-flex justify-end">
+              <VPagination v-model="options.page" total-visible="5"
+                :length="Math.ceil(userList.length / options.itemsPerPage)" />
+            </VCol>
+          </VRow>
+        </VCardText>
+      </template>
+    </VDataTable>
+  </div>
 
   <!-- 👉 Edit Dialog  -->
   <VDialog v-model="editDialog" max-width="600px">
