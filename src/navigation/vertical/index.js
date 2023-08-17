@@ -5,8 +5,13 @@ export default [
     icon: { icon: 'tabler-smart-home' },
   },
   {
-    title: 'Segunda página',
-    to: { name: 'second-page' },
-    icon: { icon: 'tabler-file' },
+    title: 'Checklist',
+    to: { name: 'checklist-page' },
+    icon: { icon: 'tabler-checkbox' },
+  },
+  {
+    title: 'Items',
+    to: { name: 'items-page' },
+    icon: { icon: 'tabler-list' },
   },
 ]

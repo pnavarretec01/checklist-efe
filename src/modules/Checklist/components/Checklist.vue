@@ -1,127 +1,61 @@
 <script setup>
-import { ref } from 'vue';
+import { themeConfig } from '@themeConfig'
+import useChecklist from '../composables/useChecklist'
+import TabsComponent from './TabsComponent.vue'
 
-const currentTab = ref(0)
-
-const parentItems = ref([
-  {
-    id: 1,
-    title: 'Inspección de Vía',
-    items: [
-      {
-        id: 1,
-        title: 'Eclisas quebradas',
-        data: [], // Aquí se llenarán los datos obtenidos de la API
-      },
-      {
-        id: 2,
-        title: 'Rieles quebrados',
-        data: [],
-      },
-      {
-        id: 3,
-        title: 'Durmientes en malas condiciones',
-        data: [],
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: 'Aparatos de cambio de vía',
-    items: [
-      {
-        id: 4,
-        title: 'Falta de lubricación',
-        data: [],
-      },
-      {
-        id: 5,
-        title: 'Tirantes doblados',
-        data: [],
-      },
-      {
-        id: 6,
-        title: 'Agujas y/o cruzamientos quebrados',
-        data: [],
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: 'Inspección de Vía',
-    items: [
-      {
-        id: 1,
-        title: 'Eclisas quebradas',
-        data: [], // Aquí se llenarán los datos obtenidos de la API
-      },
-      {
-        id: 2,
-        title: 'Rieles quebrados',
-        data: [],
-      },
-      {
-        id: 3,
-        title: 'Durmientes en malas condiciones',
-        data: [],
-      },
-    ],
-  },
-  {
-    id: 4,
-    title: 'Aparatos de cambio de vía',
-    items: [
-      {
-        id: 4,
-        title: 'Falta de lubricación',
-        data: [],
-      },
-      {
-        id: 5,
-        title: 'Tirantes doblados',
-        data: [],
-      },
-      {
-        id: 6,
-        title: 'Agujas y/o cruzamientos quebrados',
-        data: [],
-      },
-    ],
-  },
-])
-
-const addCaracteristica = (subitem) => {
-  subitem.data.push({
-    id: Date.now(),
-    pk: 0,
-    collera: '',
-    observacion: ''
-  })
-}
+const {
+  currentTab,
+  parentItems,
+  addCaracteristica,
+  removeEntry,
+  saveData,
+} = useChecklist()
 </script>
 
 <template>
   <VCard>
-    <VTabs v-model="currentTab">
-      <VTab v-for="item in parentItems" :key="item.id" :value="item.id">
-        {{ item.title }}
-      </VTab>
-    </VTabs>
+    <div class="ma-sm-4">
+      <div class="d-flex align-center mb-6">
+        <h6 class="font-weight-bold text-xl">
+          Checklist Revisión de Infraestructura Zona Norte
+        </h6>
+      </div>
 
-    <VCardText>
-      <VWindow v-model="currentTab">
-        <VWindowItem v-for="item in parentItems" :key="item.id" :value="item.id">
-          <div v-for="subitem in item.items">
-            <h3>{{ subitem.title }}</h3>
-            <div v-for="entry in subitem.data">
-              <input v-model="entry.pk" placeholder="PK" />
-              <input v-model="entry.collera" placeholder="Collera" />
-              <textarea v-model="entry.observacion" placeholder="Observación"></textarea>
-            </div>
-            <button @click="addCaracteristica(subitem)">Añadir</button>
-          </div>
-        </VWindowItem>
-      </VWindow>
-    </VCardText>
+      <div class="pa-5 flex-grow-1">
+        <VRow>
+          <VCol cols="12" md="6">
+            <VTextField rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor" />
+          </VCol>
+          <VCol cols="12" md="6">
+            <VTextField type="date" label="Fecha" />
+          </VCol>
+          <VCol cols="12" md="6">
+            <VTextField rows="2" label="Subdivisión" placeholder="Subdivisión" />
+          </VCol>
+          <VCol cols="12" md="3" sm="4">
+            <VTextField type="number" label="Pk Inicio" />
+          </VCol>
+          <VCol cols="12" md="3" sm="4">
+            <VTextField type="number" label="Pk Término" />
+          </VCol>
+        </VRow>
+      </div>
+    </div>
+
+
+    <TabsComponent v-model:current-tab="currentTab" :parent-items="parentItems" @addCaracteristica="addCaracteristica"
+      @removeEntry="removeEntry" />
+
+    <div class="mt-2 mb-2">
+      <hr>
+      <VBtn color="primary" @click="() => saveData(0)">
+        Guardar
+      </VBtn>
+      <VBtn class="ma-sm-1" color="primary" @click="() => saveData(1)">
+        Guardar y Cerrar
+      </VBtn>
+    </div>
   </VCard>
 </template>
+
+../composables/useItems
