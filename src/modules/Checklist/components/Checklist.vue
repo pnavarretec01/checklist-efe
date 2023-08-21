@@ -57,5 +57,3 @@ const {
     </div>
   </VCard>
 </template>
-
-../composables/useItems
