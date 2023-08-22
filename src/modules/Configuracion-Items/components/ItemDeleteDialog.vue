@@ -30,7 +30,8 @@ const confirm = () => {
 
 </script>
 <template>
-  <VDialog v-model="localDialog" max-width="500px">
+  <VDialog v-model="localDialog" max-width="500px" @click:outside="close">
+    <DialogCloseBtn @click="close" />
     <VCard>
       <VCardTitle>
         ¿Estás seguro que deseas eliminar este Item?

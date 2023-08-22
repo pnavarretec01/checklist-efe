@@ -14,4 +14,8 @@ export default [
     to: { name: 'items-page' },
     icon: { icon: 'tabler-list' },
   },
+  {
+    title: 'Sub divisiones',
+    icon: { icon: 'tabler-arrow-autofit-content' },
+  },
 ]

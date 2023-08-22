@@ -36,7 +36,8 @@ const save = () => {
 </script>
 
 <template>
-  <VDialog v-model="localDialog" max-width="600px">
+  <VDialog v-model="localDialog" max-width="600px" @click:outside="close">
+    <DialogCloseBtn @click="close" />
     <VCard>
       <VCardTitle>
         <span class="headline">{{ item && item.pk_item_id ? 'Editar Item' : 'Nuevo Item' }}</span>
@@ -56,7 +57,7 @@ const save = () => {
       <VCardActions>
         <VSpacer />
         <VBtn color="error" variant="outlined" @click="close">Cancelar</VBtn>
-        <VBtn color="success" variant="elevated" @click="save">Guardar</VBtn>
+        <VBtn color="success" variant="elevated" @click="save">{{ item && item.pk_item_id ? 'Editar' : 'Guardar' }}</VBtn>
       </VCardActions>
     </VCard>
   </VDialog>

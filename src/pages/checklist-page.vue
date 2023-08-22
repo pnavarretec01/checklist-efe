@@ -1,5 +1,5 @@
 <script setup>
-import Tabla from '@/modules/tabla/components/tabla.vue'
+import Tabla from '@/modules/Checklist/components/Tabla-Checklist.vue'
 </script>
 
 <template>
