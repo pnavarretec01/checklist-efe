@@ -1,8 +1,9 @@
-import { ref } from 'vue'
+
+import { onMounted, ref } from 'vue';
 
 export default function useChecklist() {
-  const currentTab = ref(0)
-  
+  const currentTab = ref(0);
+
   const parentItems = ref([
     {
       id: 1,
@@ -90,27 +91,45 @@ export default function useChecklist() {
     },
   ])
 
+  const fetchData = async () => {
+    if (navigator.onLine) {
+      try {
+        // const response = await fetch('/api/checklist-data');
+        // const data = await response.json();
+        // parentItems.value = data;
+        console.log("cargado de manera online");
+      } catch (error) {
+        console.error("Error fetching data from API:", error);
+      }
+    } else {
+      console.log("Estás offline. Se cargará la data desde IndexedDB.");
+     
+    }
+  }
+
   const addCaracteristica = subitem => {
     subitem.data.push({
       id: Date.now(),
       pk: 0,
       collera: '',
       observacion: '',
-    })
+    });
   }
 
   const removeEntry = (subitem, index) => {
-    subitem.data.splice(index, 1)
+    subitem.data.splice(index, 1);
   }
 
   const saveData = cerrado => {
     const dataToSave = {
       parentItems: parentItems.value,
       cerrado: cerrado,
-    }
+    };
 
-    console.log(dataToSave)
+    console.log(dataToSave);
   }
+
+  onMounted(fetchData);
 
   return {
     currentTab,
@@ -120,3 +139,4 @@ export default function useChecklist() {
     saveData,
   }
 }
+
