@@ -9,8 +9,6 @@ import { VDataTable } from 'vuetify/labs/VDataTable'
 const { items, subitems, error, fetchItems, fetchSubitemsForItem, createItem, apiCreateSubitem,
   updateItem, apiUpdateSubitem, apiDeleteItem, apiDeleteSubitem } = useItemsApi();
 
-
-
 const headers = [
   { title: 'ID', key: 'pk_item_id' },
   { title: 'Nombre', key: 'nombre' },
@@ -169,16 +167,25 @@ function close() {
   editedItem.value = {};
 }
 
-function handleApiResponse(response) {
-  if (response.status >= 200 && response.status < 300) {
-    snackbarMessage.value = "Operación exitosa";
-    snackbarColor.value = "success";
-  } else {
-    snackbarMessage.value = "Error en la operación";
+async function handleApiResponse(promise) {
+  try {
+    const response = await promise;
+    if (response.code >= 200 && response.code < 300) {
+      snackbarMessage.value = "Operación exitosa";
+      snackbarColor.value = "success";
+      return response.data;
+    } else {
+      const data = await response.json();
+      throw new Error(data.message || "Error en la operación");
+    }
+  } catch (error) {
+    snackbarMessage.value = error.message || "Error en la operación";
     snackbarColor.value = "error";
+    snackbar.value = true;
+    throw error;
   }
-  snackbar.value = true;
 }
+
 </script>
 <template>
   <div>

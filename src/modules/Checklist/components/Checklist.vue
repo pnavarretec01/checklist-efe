@@ -1,5 +1,4 @@
 <script setup>
-import { themeConfig } from '@themeConfig'
 import useChecklist from '../composables/useChecklist'
 import TabsComponent from './TabsComponent.vue'
 
@@ -9,6 +8,7 @@ const {
   addCaracteristica,
   removeEntry,
   saveData,
+  sendCaracteristicas 
 } = useChecklist()
 </script>
 

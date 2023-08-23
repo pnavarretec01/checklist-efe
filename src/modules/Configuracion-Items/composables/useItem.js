@@ -27,7 +27,7 @@ export function useItemsApi() {
         nombre: item.nombre,
         orden: item.orden,
       });
-      items.value.push(response.data.data);
+      items.value.unshift(response.data.data);
     } catch (err) {
       error.value = err.message;
     }
@@ -87,6 +87,7 @@ export function useItemsApi() {
       if (index !== -1) {
         items.value[index].subitems.push(response.data.data);
       }
+      return response.data;
     } catch (err) {
       error.value = err.message;
     }

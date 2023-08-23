@@ -12,6 +12,7 @@ const props = defineProps({
     required: true
   },
 });
+const localItem = ref(JSON.parse(JSON.stringify(props.item)));
 
 const editar = ref({});
 const subItemsBackup = ref({}); // Para almacenar la versión original de los subítems en edición
@@ -121,7 +122,9 @@ const cancelAdding = () => {
                       @click="save(subitem, index)">Guardar</VBtn>
                     <VBtn size="small" color="error" variant="outlined" @click="cancelEdit(subitem, index)"
                       v-if="editar[index]">Cancelar</VBtn>
-                    <VBtn size="small" color="error" variant="outlined" v-if="!editar[index]">Eliminar</VBtn>
+                    <VBtn size="small" color="error" variant="outlined" v-if="!editar[index]"
+                      @click="emit('deleteSubitem', subitem)">Eliminar</VBtn>
+
                   </VCol>
                 </VListItemTitle>
               </VListItem>
