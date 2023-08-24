@@ -28,8 +28,9 @@ export function useItemsApi() {
         orden: item.orden,
       });
       items.value.unshift(response.data.data);
+      return response.data.data;
     } catch (err) {
-      error.value = err.message;
+      throw err;
     }
   };
 
@@ -43,20 +44,22 @@ export function useItemsApi() {
         (i) => i.pk_item_id === item.pk_item_id
       );
       if (index !== -1) {
-        items.value[index] = response.data.data;
+        items.value[index] = response.data;
       }
+      return response;
     } catch (err) {
-      error.value = err.message;
+      throw err;
     }
   };
 
   const apiDeleteItem = async (itemId) => {
     try {
-      await axios.delete(`${apiURL}/${itemId}`);
+      const response = await axios.delete(`${apiURL}/${itemId}`);
       const index = items.value.findIndex((i) => i.pk_item_id === itemId);
       if (index !== -1) {
         items.value.splice(index, 1);
       }
+      return response.data;
     } catch (err) {
       error.value = err.message;
     }
@@ -70,12 +73,28 @@ export function useItemsApi() {
     try {
       const response = await axios.get(`${apiURLSubItems}/${itemId}/subitems`);
       subitems.value = response.data.data;
-      return response.data.data;
+      return response.data;
     } catch (err) {
       error.value = err.message;
       console.error(`Error fetching subitems for item ${itemId}:`, err);
     }
   };
+
+  // const apiCreateSubitem = async (itemId, subitemData) => {
+  //   try {
+  //     const response = await axios.post(
+  //       `${apiURLSubItems}/${itemId}`,
+  //       subitemData
+  //     );
+  //     const index = items.value.findIndex((i) => i.pk_item_id === itemId);
+  //     if (index !== -1) {
+  //       items.value[index].subitems.unshift(response.data.data);
+  //     }
+  //     return response.data;
+  //   } catch (err) {
+  //     error.value = err.message;
+  //   }
+  // };
 
   const apiCreateSubitem = async (itemId, subitemData) => {
     try {
@@ -85,13 +104,14 @@ export function useItemsApi() {
       );
       const index = items.value.findIndex((i) => i.pk_item_id === itemId);
       if (index !== -1) {
-        items.value[index].subitems.push(response.data.data);
+        items.value[index].subitems.unshift(response.data.data);
       }
-      return response.data;
+      return response;
     } catch (err) {
-      error.value = err.message;
+      throw new Error(err.response?.data?.message || err.message || "Error desconocido al crear subitem");
     }
-  };
+};
+
 
   async function apiUpdateSubitem(itemId, subitemId, subitemData) {
     try {
@@ -99,18 +119,16 @@ export function useItemsApi() {
         `${apiURLSubItems}/${itemId}/subitems/${subitemId}`,
         subitemData
       );
-      return response.data;
+      return response;
     } catch (error) {
-      throw new Error("Hubo un problema al actualizar el subítem.");
+      throw error; // Lanza el error completo
     }
   }
 
   const apiDeleteSubitem = async (itemId, subitemId) => {
     try {
-      const response = await axios.delete(
-        `${apiURL}/${itemId}/subitems/${subitemId}`
-      );
-      return response.data.data;
+      const response = await axios.delete(`${apiURLSubItems}/${subitemId}`);
+      return response.data;
     } catch (err) {
       error.value = err.message;
     }

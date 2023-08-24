@@ -3,12 +3,15 @@ import { ref, onMounted, watchEffect, computed } from 'vue';
 import ItemEditDialog from './ItemEditDialog.vue';
 import SubItemEditDialog from './SubItemEditDialog.vue';
 import ItemDeleteDialog from './ItemDeleteDialog.vue';
+import SubItemDeleteDialog from './SubItemDeleteDialog.vue';
 import { useItemsApi } from '../composables/useItem';
 import { VDataTable } from 'vuetify/labs/VDataTable'
 
 const { items, subitems, error, fetchItems, fetchSubitemsForItem, createItem, apiCreateSubitem,
   updateItem, apiUpdateSubitem, apiDeleteItem, apiDeleteSubitem } = useItemsApi();
 
+
+/** funcionalidades tabla */
 const headers = [
   { title: 'ID', key: 'pk_item_id' },
   { title: 'Nombre', key: 'nombre' },
@@ -27,22 +30,27 @@ const computedItems = computed(() => {
   const end = start + options.value.itemsPerPage;
   return items.value.slice(start, end);
 });
+const search = ref('');
+/** fin funcionalidades tabla */
+
+
+onMounted(refreshItems);
 
 const editedItem = ref({
   nombre: '',
   orden: '',
   subitems: []
 });
-const search = ref('');
 const loading = ref(false);
 const editDialog = ref(false);
 const editSubItemDialog = ref(false);
 const deleteDialog = ref(false);
+const deleteDialogSubItem = ref(false);
 const snackbar = ref(false);
 const snackbarMessage = ref("");
 const snackbarColor = ref("");
+const deletedSubItem = ref([]);
 
-onMounted(refreshItems);
 
 async function refreshItems() {
   loading.value = true;
@@ -56,35 +64,9 @@ async function refreshItems() {
   loading.value = false;
 }
 
-function prepareDeleteItem(item) {
-  editedItem.value = { ...item.value };
-  deleteDialog.value = true;
-}
-
-async function confirmDelete() {
-  try {
-    await handleApiResponse(apiDeleteItem(editedItem.value.pk_item_id));
-    snackbarMessage.value = "Ítem eliminado con éxito";
-    snackbarColor.value = "success";
-    await refreshItems();
-  } catch (error) {
-    snackbarMessage.value = error.message || "Error al eliminar el ítem";
-    snackbarColor.value = "error";
-  }
-  snackbar.value = true;
-  closeDelete();
-}
-
-function closeDelete() {
-  deleteDialog.value = false;
-  editedItem.value = {};
-}
-
-async function editItem(item) {
-  editedItem.value = { ...item.value };
-  editDialog.value = true;
-}
-
+/**
+ * subitem
+ */
 async function abrirSubitem(item) {
   editedItem.value = { ...item.value };
   editSubItemDialog.value = true;
@@ -94,41 +76,122 @@ function closeSubItem() {
   editedItem.value = {};
 }
 
-const addSubitem = () => {
-  editedItem.value.subitems.push({});
+const addSubitem = (subitem) => {
+  editedItem.value.subitems.unshift(subitem);
 };
 
 async function saveSubItem(payload) {
+
+
   try {
     let responseData;
-    const { itemId, subitem } = payload;
+
+    const itemId = payload.fk_item_id
+    const subitem = payload
 
     if (subitem.pk_subitem_id) {
-      responseData = await handleApiResponse(apiUpdateSubitem(itemId, subitem.pk_subitem_id, subitem));
+      responseData = await apiUpdateSubitem(itemId, subitem.pk_subitem_id, subitem);
+      if (responseData.code < 200 || responseData.code >= 300) {
+        throw new Error(responseData.status || "Error al actualizar el subítem");
+      }
       snackbarMessage.value = "SubItem actualizado con éxito";
     } else {
-      responseData = await handleApiResponse(apiCreateSubitem(itemId, subitem));
+      responseData = await apiCreateSubitem(itemId, subitem);
+      if (responseData.code < 200 || responseData.code >= 300) {
+        throw new Error(responseData.status || "Error al crear el subítem");
+      }
       snackbarMessage.value = "SubItem creado con éxito";
     }
 
     snackbarColor.value = "success";
+    addSubitem(subitem);
     await refreshItems();
   } catch (error) {
-    snackbarMessage.value = error.message || "Error al guardar el subitem";
+    snackbarMessage.value = error.response.data.message;
     snackbarColor.value = "error";
+    snackbar.value = true;
+  } finally {
+    snackbar.value = true;
   }
-  snackbar.value = true;
 }
 
-const deleteSubitem = (subitem) => {
+async function confirmDeleteSubitem(subitem) {
   const index = editedItem.value.subitems.indexOf(subitem);
   if (index !== -1) {
-    editedItem.value.subitems.splice(index, 1);
-    if (subitem.pk_subitem_id) {
-      apiDeleteSubitem(editedItem.value.pk_item_id, subitem.pk_subitem_id);
+    try {
+      if (subitem.pk_subitem_id) {
+        const response = await apiDeleteSubitem(editedItem.value.pk_item_id, subitem.pk_subitem_id);
+        if (response.code < 200 || response.code >= 300) {
+          throw new Error(response.status || "Error al eliminar el subítem");
+        }
+        snackbarMessage.value = "SubItem eliminado con éxito";
+        snackbarColor.value = "success";
+      }
+      editedItem.value.subitems.splice(index, 1);
+    } catch (error) {
+      snackbarMessage.value = error.response.data.message;
+      snackbarColor.value = "error";
+      snackbar.value = true;
+    } finally {
+      snackbar.value = true;
     }
+    closeDeleteSubItem();
   }
-};
+}
+
+function deleteSubitem(item) {
+  deletedSubItem.value = item
+  deleteDialogSubItem.value = true;
+}
+
+function closeDeleteSubItem() {
+  deleteDialogSubItem.value = false;
+  deletedSubItem.value = {};
+}
+
+/**
+ * fin subitem
+ */
+
+/**
+* item
+*/
+function prepareDeleteItem(item) {
+  editedItem.value = { ...item.value };
+  deleteDialog.value = true;
+}
+
+async function confirmDelete() {
+  try {
+    const response = await apiDeleteItem(editedItem.value.pk_item_id);
+    if (response.code < 200 || response.code >= 300) {
+      throw new Error(response.status || "Error al eliminar el ítem");
+    }
+
+    snackbarMessage.value = "Ítem eliminado con éxito";
+    snackbarColor.value = "success";
+    await refreshItems();
+  } catch (error) {
+    snackbarMessage.value = error.response.data.message;
+    snackbarColor.value = "error";
+    snackbar.value = true;
+  } finally {
+    snackbar.value = true;
+  }
+  closeDelete();
+}
+
+
+function closeDelete() {
+  deleteDialog.value = false;
+  editedItem.value = {};
+}
+
+
+async function editItem(item) {
+  editedItem.value = { ...item.value };
+  editDialog.value = true;
+}
 
 function createNewItem() {
   editedItem.value = {
@@ -141,47 +204,55 @@ function createNewItem() {
 async function saveItem() {
   try {
     let responseData;
+
     if (editedItem.value.pk_item_id) {
-      responseData = await handleApiResponse(updateItem(editedItem.value));
+      responseData = await updateItem(editedItem.value);
+      if (responseData.code < 200 || responseData.code >= 300) {
+        throw new Error(responseData.status || "Error al actualizar el ítem");
+      }
       snackbarMessage.value = "Ítem actualizado con éxito";
-      close();
     } else {
-      responseData = await handleApiResponse(createItem(editedItem.value));
+      responseData = await createItem(editedItem.value);
+      if (responseData.code < 200 || responseData.code >= 300) {
+        throw new Error(responseData.status || "Error al crear el ítem");
+      }
       snackbarMessage.value = "Ítem creado con éxito";
-      close();
     }
 
     snackbarColor.value = "success";
+    close();
     await refreshItems();
   } catch (error) {
-    // snackbarMessage.value = "Error al guardar el ítem";
-    snackbarMessage.value = error.message || "Error al guardar el ítem";
+    snackbarMessage.value = error.response.data.message;
     snackbarColor.value = "error";
+    snackbar.value = true;
+  } finally {
+    snackbar.value = true;
   }
-  snackbar.value = true;
-
 }
+
 
 function close() {
   editDialog.value = false;
   editedItem.value = {};
 }
+/**
+* item
+*/
 
 async function handleApiResponse(promise) {
   try {
     const response = await promise;
-    if (response.code >= 200 && response.code < 300) {
-      snackbarMessage.value = "Operación exitosa";
-      snackbarColor.value = "success";
+    if (response.data.success) {
       return response.data;
     } else {
-      const data = await response.json();
-      throw new Error(data.message || "Error en la operación");
+      throw new Error(response.data.message || "Error en la operación");
     }
   } catch (error) {
-    snackbarMessage.value = error.message || "Error en la operación";
-    snackbarColor.value = "error";
-    snackbar.value = true;
+    console.log(error);
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || "Error en la operación");
+    }
     throw error;
   }
 }
@@ -228,10 +299,12 @@ async function handleApiResponse(promise) {
     </VDataTable>
 
     <SubItemEditDialog :item="editedItem" :dialog="editSubItemDialog" @closeSubItem="closeSubItem"
-      @deleteSubitem="deleteSubitem" @saveSubitem="saveSubItem" />
+      @deleteSubitem="deleteSubitem" @saveSubItem="saveSubItem" />
     <ItemEditDialog :item="editedItem" :dialog="editDialog" @close="close" @save="saveItem" />
     <ItemDeleteDialog :item="editedItem" :dialog="deleteDialog" @closeDelete="closeDelete"
       @confirmDelete="confirmDelete" />
+    <SubItemDeleteDialog :item="deletedSubItem" :dialog="deleteDialogSubItem" @closeDelete="closeDeleteSubItem"
+      @confirmDelete="confirmDeleteSubitem" />
 
   </div>
   <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">

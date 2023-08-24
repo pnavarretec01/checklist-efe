@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, defineEmits, isRef } from 'vue';
+import { ref, watch, isRef } from 'vue';
 const emit = defineEmits();
 
 const props = defineProps({
@@ -45,7 +45,7 @@ const save = () => {
       <VCardText>
         <VContainer>
           <VRow>
-            <VCol cols="12" sm="6" md="4">
+            <VCol cols="12" sm="6" md="8">
               <VTextField v-model="item.nombre" label="Nombre" />
             </VCol>
             <VCol cols="12" sm="6" md="4">

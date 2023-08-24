@@ -2,6 +2,9 @@
 <script setup>
 import { VDataTable } from 'vuetify/labs/VDataTable'
 import useChecklist from '../composables/useChecklist'
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
 
 const { items,
   fetchItems,
@@ -43,12 +46,17 @@ watch(options, newVal => {
   }
 });
 
+const editItem = (item) => {
+  router.push({ name: 'checklist-id', params: { id: item.value.pk_formulario_id } });
+}
+
+
 </script>
 
 <template>
   <div>
     <div class="me-3 d-flex gap-3 mb-4 mt-1">
-      <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
+      <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist'}">
         Crear Nuevo Checklist
       </VBtn>
     </div>

@@ -15,17 +15,17 @@ const props = defineProps({
 const localItem = ref(JSON.parse(JSON.stringify(props.item)));
 
 const editar = ref({});
-const subItemsBackup = ref({}); // Para almacenar la versión original de los subítems en edición
-// Función para iniciar la edición
+const subItemsBackup = ref({});
+
 const startEdit = (subitem, index) => {
   editar.value[index] = true;
-  subItemsBackup.value[index] = { ...subitem }; // Creamos una copia del subítem antes de editar
+  subItemsBackup.value[index] = { ...subitem };
 };
 // Función para cancelar la edición
 const cancelEdit = (subitem, index) => {
   editar.value[index] = false;
-  Object.assign(subitem, subItemsBackup.value[index]); // Restauramos el subítem a su estado original
-  delete subItemsBackup.value[index]; // Limpiamos el backup
+  Object.assign(subitem, subItemsBackup.value[index]);
+  delete subItemsBackup.value[index];
 };
 
 const localDialog = ref(props.dialog);
@@ -45,7 +45,7 @@ watch(localDialog, (newVal) => {
 });
 
 const save = (subitem, index) => {
-  emit('saveSubitem', subitem);
+  emit('saveSubItem', subitem);
   editar.value[index] = false;
   delete subItemsBackup.value[index];
 };
@@ -59,7 +59,7 @@ const startAdding = () => {
 
 const saveNewSubitem = () => {
   let data = { itemId: props.item.pk_item_id, subitem: newSubItem.value }
-  emit('saveSubitem', data);
+  emit('saveSubItem', data);
 
   newSubItem.value = { nombre: '', orden: '' };
   addingMode.value = false;
@@ -89,10 +89,10 @@ const cancelAdding = () => {
             <VCol cols="12" sm="12" md="12">
               <VTextField v-model="newSubItem.orden" label="Orden" />
             </VCol>
-            <VCol cols="12" sm="12" md="12">
-              <VBtn color="success" @click="saveNewSubitem">Guardar</VBtn>
-              <VBtn color="error" @click="cancelAdding">Cancelar</VBtn>
-            </VCol>
+
+            <VBtn color="success" @click="saveNewSubitem">Guardar</VBtn>
+            <VBtn class="ml-1" color="error" @click="cancelAdding">Cancelar</VBtn>
+
           </div>
         </VContainer>
         <!--termino form agregar nuevo-->
@@ -120,11 +120,10 @@ const cancelAdding = () => {
                       v-if="!editar[index]">Editar</VBtn>
                     <VBtn size="small" color="success" variant="elevated" v-if="editar[index]"
                       @click="save(subitem, index)">Guardar</VBtn>
-                    <VBtn size="small" color="error" variant="outlined" @click="cancelEdit(subitem, index)"
+                    <VBtn class="ml-1" size="small" color="error" variant="outlined" @click="cancelEdit(subitem, index)"
                       v-if="editar[index]">Cancelar</VBtn>
-                    <VBtn size="small" color="error" variant="outlined" v-if="!editar[index]"
+                    <VBtn class="ml-1" size="small" color="error" variant="outlined" v-if="!editar[index]"
                       @click="emit('deleteSubitem', subitem)">Eliminar</VBtn>
-
                   </VCol>
                 </VListItemTitle>
               </VListItem>
@@ -135,7 +134,7 @@ const cancelAdding = () => {
       </VCardText>
       <VCardActions>
         <VSpacer />
-        <VBtn variant="outlined" @click="close">Cerrar</VBtn>
+        <VBtn variant="outlined" color="success" @click="close">Cerrar</VBtn>
       </VCardActions>
     </VCard>
   </VDialog>

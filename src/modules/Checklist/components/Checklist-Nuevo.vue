@@ -1,19 +1,6 @@
 <script setup>
-import { useRoute } from 'vue-router';
-import { ref, onMounted } from 'vue';
 import useChecklist from '../composables/useChecklist'
 import TabsComponent from './TabsComponent.vue'
-
-const route = useRoute();
-const id = ref(route.params.id);
-
-onMounted(() => {
-  if (id.value) {
-    console.log(id.value);
-  } else {
-    console.log("sin id.value");
-  }
-});
 
 const {
   currentTab,
@@ -28,7 +15,7 @@ const {
 
 <template>
   <VCard>
-    <div class="d-flex justify-end align-start gap-3 mb-4 mt-4 me5">
+    <div class="d-flex justify-end align-start gap-3 mb-4 mt-4 me-5">
       <VBtn prepend-icon="tabler-arrow-left" color="error" :to="{ name: 'checklist-page' }">
         Volver
       </VBtn>

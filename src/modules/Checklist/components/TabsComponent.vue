@@ -1,6 +1,4 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue'
-
 const props = defineProps(['currentTab', 'parentItems'])
 const emit = defineEmits()
 
@@ -11,6 +9,25 @@ const addCaracteristica = subitem => {
 const removeEntry = (subitem, index) => {
   emit('removeEntry', subitem, index)
 }
+props.parentItems.forEach(item => {
+  item.items.forEach(subitem => {
+    subitem.data.forEach((entry, entryIndex) => {
+      watch(
+        () => [entry.pk, entry.collera],
+        ([newPk, newCollera]) => {
+          if (!newPk || !newCollera) {
+            entry.observacion = '';
+
+            if (!newPk && !newCollera) {
+              subitem.data.splice(entryIndex, 1);
+            }
+          }
+        }
+      );
+    });
+  });
+});
+
 </script>
 
 <template>
@@ -27,13 +44,13 @@ const removeEntry = (subitem, index) => {
           <div v-for="(subitem, indexSubItem) in item.items" :key="indexSubItem">
             <h3>{{ subitem.title }}</h3>
             <VRow v-for="(entry, entryIndex) in subitem.data" :key="entryIndex" align="center" class="mb-2">
-              <VCol cols="12" md="3">
+              <VCol cols="6" md="3">
                 <VTextField v-model="entry.pk" type="number" label="PK" />
               </VCol>
-              <VCol cols="12" md="3">
+              <VCol cols="6" md="3">
                 <VTextField v-model="entry.collera" type="number" label="Collera" />
               </VCol>
-              <VCol cols="12" md="5">
+              <VCol cols="12" md="5" v-if="entry.pk && entry.collera">
                 <VTextarea v-model="entry.observacion" rows="2" label="Observación" placeholder="Observación" />
               </VCol>
               <VCol cols="12" md="1">
