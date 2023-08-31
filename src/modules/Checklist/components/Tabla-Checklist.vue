@@ -2,12 +2,31 @@
 <script setup>
 import { VDataTable } from 'vuetify/labs/VDataTable'
 import useChecklist from '../composables/useChecklist'
+import DeleteConfirmationDialog from './DeleteConfirmationDialog.vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
+const showDialog = ref(false);
+const itemToDelete = ref({});
 
-const { items,
+const handleDelete = (item) => {
+  deleteData(item.value.pk_formulario_id);
+  fetchItems();
+  showDialog.value = false;
+};
+
+const closeDialog = () => {
+  showDialog.value = false;
+};
+
+
+const {
+  items,
   fetchItems,
+  deleteData,
+  snackbar,
+  snackbarMessage,
+  snackbarColor
 } = useChecklist();
 
 onMounted(fetchItems);
@@ -50,13 +69,16 @@ const editItem = (item) => {
   router.push({ name: 'checklist-id', params: { id: item.value.pk_formulario_id } });
 }
 
-
+const prepareDeleteItem = (item) => {
+  itemToDelete.value = item;
+  showDialog.value = true;
+};
 </script>
 
 <template>
   <div>
     <div class="me-3 d-flex gap-3 mb-4 mt-1">
-      <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist'}">
+      <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
         Crear Nuevo Checklist
       </VBtn>
     </div>
@@ -70,7 +92,7 @@ const editItem = (item) => {
     <VDataTable :headers="headers" :items="items" :loading="loading" :items-per-page="options.itemsPerPage"
       :page="options.page" :search="search" @update:options="options = $event">
       <template v-slot:item.actions="{ item }">
-        <VIcon small @click="abrirSubitem(item)">mdi-plus-box-multiple</VIcon>
+        <!-- <VIcon small @click="abrirSubitem(item)">mdi-plus-box-multiple</VIcon> -->
         <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
         <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
       </template>
@@ -92,5 +114,11 @@ const editItem = (item) => {
         </VCardText>
       </template>
     </VDataTable>
+
+    <DeleteConfirmationDialog v-if="itemToDelete" :dialog="showDialog" :item="itemToDelete" @closeDelete="closeDialog"
+      @confirmDelete="handleDelete" />
+    <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
+      {{ snackbarMessage }}
+    </VSnackbar>
   </div>
 </template>

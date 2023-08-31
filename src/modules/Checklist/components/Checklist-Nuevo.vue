@@ -1,6 +1,13 @@
 <script setup>
-import useChecklist from '../composables/useChecklist'
+import useChecklist from '../composables/useChecklistNuevo'
 import TabsComponent from './TabsComponent.vue'
+
+const nombreSupervisor = ref('');
+const fecha = ref('');
+const subdivision = ref('');
+const pkInicio = ref(null);
+const pkTermino = ref(null);
+const observacionGeneral = ref('');
 
 const {
   currentTab,
@@ -8,8 +15,11 @@ const {
   addCaracteristica,
   removeEntry,
   saveData,
-  sendCaracteristicas
-} = useChecklist();
+  sendCaracteristicas,
+  snackbar,
+  snackbarMessage,
+  snackbarColor,
+} = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral);
 </script>
 
 
@@ -31,28 +41,28 @@ const {
       <div class="pa-5 flex-grow-1">
         <VRow>
           <VCol cols="12" md="6">
-            <VTextField rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor" />
+            <VTextField v-model="nombreSupervisor" rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor" />
           </VCol>
           <VCol cols="12" md="6">
-            <VTextField type="date" label="Fecha" />
+            <VTextField v-model="fecha" type="date" label="Fecha" />
           </VCol>
           <VCol cols="12" md="6">
-            <VTextField rows="2" label="Subdivisión" placeholder="Subdivisión" />
+            <VTextField v-model="subdivision" rows="2" label="Subdivisión" placeholder="Subdivisión" />
           </VCol>
           <VCol cols="12" md="3" sm="4">
-            <VTextField type="number" label="Pk Inicio" />
+            <VTextField v-model="pkInicio" type="number" label="Pk Inicio" />
           </VCol>
           <VCol cols="12" md="3" sm="4">
-            <VTextField type="number" label="Pk Término" />
+            <VTextField v-model="pkTermino" type="number" label="Pk Término" />
+          </VCol>
+          <VCol cols="12">
+            <VTextarea v-model="observacionGeneral" rows="3" label="Observación general"></VTextarea>
           </VCol>
         </VRow>
       </div>
     </div>
-
-
     <TabsComponent v-model:current-tab="currentTab" :parent-items="parentItems" @addCaracteristica="addCaracteristica"
       @removeEntry="removeEntry" />
-
     <div class="mt-2 mb-2">
       <hr>
       <VBtn color="primary" @click="() => saveData(0)">
@@ -62,5 +72,8 @@ const {
         Guardar y Cerrar
       </VBtn>
     </div>
+    <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
+      {{ snackbarMessage }}
+    </VSnackbar>
   </VCard>
 </template>
