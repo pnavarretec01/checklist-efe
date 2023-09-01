@@ -5,6 +5,31 @@ import { useRouter } from 'vue-router';
 const apiURL = "http://localhost:3000/api/v1/";
 
 export default function useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral) {
+  const isConnected = ref(navigator.onLine);
+
+  const updateConnectionStatus = () => {
+    isConnected.value = navigator.onLine;
+    if (isConnected.value) {
+      console.log("Conexión a Internet restaurada!");
+    } else {
+      console.log("Sin Conexión a Internet!");
+    }
+  };
+
+  onMounted(() => {
+    // Llama a fetchStructure en la montura como hacías previamente
+    //fetchStructure();
+
+    // Agrega event listeners para detectar el cambio en la conexión
+    window.addEventListener("online", updateConnectionStatus);
+    window.addEventListener("offline", updateConnectionStatus);
+  });
+
+  onUnmounted(() => {
+    // Remueve los event listeners cuando el componente se desmonta
+    window.removeEventListener("online", updateConnectionStatus);
+    window.removeEventListener("offline", updateConnectionStatus);
+  });
   const router = useRouter();
   const currentTab = ref(0);
   const items = ref([]);

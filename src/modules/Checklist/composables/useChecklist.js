@@ -13,6 +13,7 @@ export default function useChecklist(
   observacionGeneral,
   itemId
 ) {
+  
   const router = useRouter();
   const currentTab = ref(0);
   const items = ref([]);

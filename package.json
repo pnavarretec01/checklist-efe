@@ -71,6 +71,7 @@
     "unplugin-vue-components": "0.24.1",
     "vite": "4.3.3",
     "vite-plugin-pages": "0.29.0",
+    "vite-plugin-pwa": "^0.16.4",
     "vite-plugin-vue-layouts": "0.8.0",
     "vite-plugin-vuetify": "1.0.2",
     "vue-shepherd": "3.0.0"

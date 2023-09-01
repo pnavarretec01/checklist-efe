@@ -3,6 +3,7 @@ import { useRoute } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import useChecklist from '../composables/useChecklist'
 import TabsComponent from './TabsComponent.vue'
+import logoEfe from '../../../assets/images/logo-efe.svg'
 
 const route = useRoute();
 const id = ref(route.params.id);
@@ -19,8 +20,6 @@ const subdivision = ref('');
 const pkInicio = ref(null);
 const pkTermino = ref(null);
 const observacionGeneral = ref('');
-
-
 
 const {
   currentTab,
@@ -41,7 +40,7 @@ const {
 
 
 <template>
-  <VCard>
+
     <div class="d-flex justify-end align-start gap-3 mb-4 mt-4 me-5">
       <VBtn prepend-icon="tabler-arrow-left" color="error" :to="{ name: 'checklist-page' }">
         Volver
@@ -49,13 +48,12 @@ const {
     </div>
     <div class="ma-sm-4">
       <div class="d-flex align-center mb-6">
+        <img :src="logoEfe" alt="logo" style="width: 12vw; max-width: 100px; min-width: 60px;">
         <h6 class="font-weight-bold text-xl ml-3 ml-sm-0">
           Checklist Revisión de Infraestructura Zona Norte
         </h6>
-
       </div>
-
-      <div class="pa-5 flex-grow-1">
+      <div class="pt-5 pb-5 flex-grow-1">
         <VRow>
           <VCol cols="12" md="6">
             <VTextField v-model="nombreSupervisor" rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor" />
@@ -90,8 +88,8 @@ const {
         Editar y Cerrar
       </VBtn>
     </div>
-    <VSnackbar  v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
+    <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
       {{ snackbarMessage }}
     </VSnackbar>
-  </VCard>
+
 </template>

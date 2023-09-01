@@ -37,6 +37,7 @@ const headers = [
   { title: 'PK Inicio', key: 'pk_inicio' },
   { title: 'PK Termino', key: 'pk_termino' },
   { title: 'Observación', key: 'observacion_general' },
+  { title: 'Estado', key: 'cerrado' },
   { title: 'Acciones', key: 'actions' },
 ];
 
@@ -73,6 +74,10 @@ const prepareDeleteItem = (item) => {
   itemToDelete.value = item;
   showDialog.value = true;
 };
+const isClosed = (value) => {
+  return value === true || value === 1;
+};
+
 </script>
 
 <template>
@@ -96,6 +101,12 @@ const prepareDeleteItem = (item) => {
         <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
         <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
       </template>
+      <template v-slot:item.cerrado="{ item }">
+        <span :class="['badge', isClosed(item.value.cerrado) ? 'badge-success' : 'badge-warning']">
+          {{ isClosed(item.value.cerrado) ? 'Cerrado' : 'Abierto' }}
+        </span>
+      </template>
+
       <template v-slot:no-data>
         No hay datos disponibles.
       </template>
@@ -122,3 +133,20 @@ const prepareDeleteItem = (item) => {
     </VSnackbar>
   </div>
 </template>
+<style scoped>
+.badge {
+  padding: 5px 10px;
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+}
+
+.badge-success {
+  background-color: green;
+}
+
+.badge-warning {
+  background-color: orange;
+}
+</style>
+

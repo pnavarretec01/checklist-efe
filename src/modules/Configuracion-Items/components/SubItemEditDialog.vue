@@ -34,7 +34,7 @@ watch(() => props.dialog, newVal => {
   localDialog.value = newVal;
 });
 watch(() => props.item, newVal => {
-  props.item = newVal;
+  localItem.value = JSON.parse(JSON.stringify(newVal));
 });
 const close = () => {
   emit('closeSubItem');
@@ -45,7 +45,9 @@ watch(localDialog, (newVal) => {
 });
 
 const save = (subitem, index) => {
-  emit('saveSubItem', subitem);
+  let data = { itemId: props.item.pk_item_id, subitem: subitem }
+  emit('saveSubItem', data);
+
   editar.value[index] = false;
   delete subItemsBackup.value[index];
 };

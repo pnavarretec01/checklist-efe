@@ -80,32 +80,16 @@ export function useItemsApi() {
     }
   };
 
-  // const apiCreateSubitem = async (itemId, subitemData) => {
-  //   try {
-  //     const response = await axios.post(
-  //       `${apiURLSubItems}/${itemId}`,
-  //       subitemData
-  //     );
-  //     const index = items.value.findIndex((i) => i.pk_item_id === itemId);
-  //     if (index !== -1) {
-  //       items.value[index].subitems.unshift(response.data.data);
-  //     }
-  //     return response.data;
-  //   } catch (err) {
-  //     error.value = err.message;
-  //   }
-  // };
-
   const apiCreateSubitem = async (itemId, subitemData) => {
     try {
       const response = await axios.post(
         `${apiURLSubItems}/${itemId}`,
         subitemData
       );
-      const index = items.value.findIndex((i) => i.pk_item_id === itemId);
-      if (index !== -1) {
-        items.value[index].subitems.unshift(response.data.data);
-      }
+      // const index = items.value.findIndex((i) => i.pk_item_id === itemId);
+      // if (index !== -1) {
+      //   items.value[index].subitems.unshift(response.data.data);
+      // }
       return response;
     } catch (err) {
       throw new Error(err.response?.data?.message || err.message || "Error desconocido al crear subitem");

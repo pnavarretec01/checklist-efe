@@ -81,13 +81,10 @@ const addSubitem = (subitem) => {
 };
 
 async function saveSubItem(payload) {
-
-
   try {
     let responseData;
-
-    const itemId = payload.fk_item_id
-    const subitem = payload
+    const itemId = payload.itemId;
+    const subitem = payload.subitem;
 
     if (subitem.pk_subitem_id) {
       responseData = await apiUpdateSubitem(itemId, subitem.pk_subitem_id, subitem);
@@ -95,16 +92,24 @@ async function saveSubItem(payload) {
         throw new Error(responseData.status || "Error al actualizar el subítem");
       }
       snackbarMessage.value = "SubItem actualizado con éxito";
+
+      // encuentra y reemplaza el subitem en la lista en lugar de agregar uno nuevo
+      const index = editedItem.value.subitems.findIndex(s => s.pk_subitem_id === subitem.pk_subitem_id);
+      if (index !== -1) {
+        editedItem.value.subitems[index] = subitem;
+      }
     } else {
       responseData = await apiCreateSubitem(itemId, subitem);
       if (responseData.code < 200 || responseData.code >= 300) {
         throw new Error(responseData.status || "Error al crear el subítem");
       }
       snackbarMessage.value = "SubItem creado con éxito";
+
+      // solo añade el subitem si es uno nuevo
+      addSubitem(subitem);
     }
 
     snackbarColor.value = "success";
-    addSubitem(subitem);
     await refreshItems();
   } catch (error) {
     snackbarMessage.value = error.response.data.message;
