@@ -262,6 +262,7 @@ export default function useChecklist(
 
   const syncOfflineData = async () => {
     const offlineForms = getFromLocalStorage("formDataToSave");
+    console.log(offlineForms);
     if (offlineForms && isConnected.value) {
       for (let dataToSave of offlineForms) {
         try {

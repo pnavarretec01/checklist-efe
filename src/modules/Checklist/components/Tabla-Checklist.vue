@@ -30,7 +30,7 @@ const {
 } = useChecklist();
 
 const {
-  manualSync
+  manualSync,
 } = useChecklistNuevo();
 
 onMounted(fetchItems);
