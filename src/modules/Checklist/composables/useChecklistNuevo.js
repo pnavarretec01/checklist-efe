@@ -2,7 +2,7 @@ import axios from "axios";
 import { onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
-const apiURL = "http://localhost:3000/api/v1/";
+const apiURL = import.meta.env.VITE_API_URL;
 
 export default function useChecklist(
   nombreSupervisor,
@@ -27,14 +27,14 @@ export default function useChecklist(
   };
 
   const manualSync = async () => {
-    await syncPendingItems();
+    console.log("sync");
+    await syncOfflineData();
     await fetchItems();
   };
 
   const pendingForms = getFromLocalStorage("formDataToSave") || [];
 
   onMounted(() => {
-    console.log("Componente montado");
     window.addEventListener("online", updateConnectionStatus);
     window.addEventListener("offline", updateConnectionStatus);
   });
@@ -85,7 +85,6 @@ export default function useChecklist(
         }
       }
     } catch (err) {
-      console.error("Error al obtener la estructura:", err);
       const cachedData = getFromLocalStorage("checklistData"); // obtengo los datos desde LocalStorage en caso de error
       if (cachedData) {
         parentItems.value = cachedData;
@@ -145,16 +144,75 @@ export default function useChecklist(
   const sendCaracteristicas = async (dataToSave) => {
     try {
       if (!isConnected.value) {
-        console.log(123);
+        const dataToSaveLocal = {
+          formulario: {
+            nombre_supervisor: nombreSupervisor.value,
+            fecha: fecha.value,
+            subdivision: subdivision.value,
+            pk_inicio: pkInicio.value,
+            pk_termino: pkTermino.value,
+            observacion_general: observacionGeneral.value,
+            cerrado: dataToSave.cerrado,
+            needsSync: false,
+          },
+          features: [],
+        };
+        for (let item of parentItems.value) {
+          for (let subitem of item.items) {
+            for (let data of subitem.data) {
+              dataToSaveLocal.features.push({
+                pk: data.pk,
+                collera: data.collera,
+                observacion: data.observacion,
+                subitem_id: subitem.id,
+                item_id: item.id,
+              });
+            }
+          }
+        }
+
         let offlineForms = getFromLocalStorage("formDataToSave") || [];
 
-        offlineForms.push(dataToSave);
+        offlineForms.push(dataToSaveLocal);
         saveToLocalStorage("formDataToSave", offlineForms);
         isSavedOffline.value = true;
         snackbar.value = true;
         snackbarMessage.value =
           "Datos guardados localmente. Se enviarán cuando haya conexión.";
         snackbarColor.value = "info";
+
+        //data para pushear a la tabla offline, cambia estructura de la que se envía
+        const datatoPushTable = {
+          nombre_supervisor: nombreSupervisor.value,
+          fecha: fecha.value,
+          subdivision: subdivision.value,
+          pk_inicio: pkInicio.value,
+          pk_termino: pkTermino.value,
+          observacion_general: observacionGeneral.value,
+          cerrado: dataToSave.cerrado,
+          needsSync: true,
+
+          items: [],
+        };
+        for (let item of parentItems.value) {
+          for (let subitem of item.items) {
+            for (let data of subitem.data) {
+              datatoPushTable.features.push({
+                pk: data.pk,
+                collera: data.collera,
+                observacion: data.observacion,
+                subitem_id: subitem.id,
+                item_id: item.id,
+              });
+            }
+          }
+        }
+
+        const storedChecklistData = getFromLocalStorage("checklist_datatabla") || [];
+        storedChecklistData.push(datatoPushTable);
+        saveToLocalStorage("checklist_datatabla", storedChecklistData);
+
+        router.push({ name: "checklist-page" });
         return;
       }
 

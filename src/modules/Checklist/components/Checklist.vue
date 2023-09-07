@@ -1,13 +1,13 @@
 <script setup>
 import { useRoute } from 'vue-router';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import useChecklist from '../composables/useChecklist'
 import TabsComponent from './TabsComponent.vue'
 import logoEfe from '../../../assets/images/logo-efe.svg'
 
 const props = defineProps({
   id: {
-    type: [String, Number], // según lo que esperes
+    type: [String, Number],
     required: true
   },
   formulario: {
@@ -53,7 +53,7 @@ onMounted(() => {
   </div>
   <div class="ma-sm-4">
     <div class="d-flex align-center mb-6">
-      <img :src="logoEfe" alt="logo" style="width: 12vw; max-width: 100px; min-width: 60px;">
+      <img :src="logoEfe" alt="logo" style="width: 12vw; min-width: 60px; max-width: 100px;">
       <h6 class="font-weight-bold text-xl ml-3 ml-sm-0">
         Checklist Revisión de Infraestructura Zona Norte
       </h6>

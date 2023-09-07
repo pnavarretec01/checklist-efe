@@ -2,6 +2,7 @@
 <script setup>
 import { VDataTable } from 'vuetify/labs/VDataTable'
 import useChecklist from '../composables/useChecklist'
+import useChecklistNuevo from '../composables/useChecklistNuevo'
 import DeleteConfirmationDialog from './DeleteConfirmationDialog.vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
@@ -26,8 +27,11 @@ const {
   snackbar,
   snackbarMessage,
   snackbarColor,
-  manualSync
 } = useChecklist();
+
+const {
+  manualSync
+} = useChecklistNuevo();
 
 onMounted(fetchItems);
 
@@ -101,9 +105,7 @@ const isClosed = (value) => {
     <VDataTable :headers="headers" :items="items" :loading="loading" :items-per-page="options.itemsPerPage"
       :page="options.page" :search="search" @update:options="options = $event">
       <template v-slot:item.actions="{ item }">
-        <!-- <VIcon small @click="abrirSubitem(item)">mdi-plus-box-multiple</VIcon> -->
         <VIcon v-if="item.needsSync" small class="me-2">mdi-sync-alert</VIcon>
-        <VIcon v-else small class="me-2">mdi-check</VIcon>
         <VIcon v-else small class="me-2">mdi-check</VIcon>
         <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
         <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
@@ -142,10 +144,11 @@ const isClosed = (value) => {
 </template>
 <style scoped>
 .badge {
-  padding: 5px 10px;
   border-radius: 12px;
   color: white;
   font-weight: bold;
+  padding-block: 5px;
+  padding-inline: 10px;
 }
 
 .badge-success {

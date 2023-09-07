@@ -2,7 +2,7 @@ import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-const apiURL = "http://localhost:3000/api/v1/";
+const apiURL = import.meta.env.VITE_API_URL;
 
 export default function useChecklist(
   nombreSupervisor,
