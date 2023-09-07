@@ -1,16 +1,17 @@
 <template>
   <div>
-    <VCard class="mb-6" title="Kick start your project 🚀">
+    <VCard class="mb-6" title="Checklist EFE 🚀">
       <VCardText>
-        Enim eu laborum officia incididunt ea. Cupidatat do ea ullamco velit ut mollit. Qui fugiat sunt ullamco
-        aliqua ea ipsum enim voluptate.
+        Veniam excepteur aliquip ipsum eiusmod do eu pariatur. Est mollit duis et cupidatat nisi aliqua occaecat. Pariatur
+        quis et enim ea magna consectetur commodo veniam cillum. Reprehenderit et laboris ut duis labore do velit eiusmod
+        mollit occaecat cupidatat. Culpa nisi laborum exercitation aute veniam labore dolor reprehenderit proident magna
+        quis. Excepteur in labore sint consectetur Lorem cupidatat Lorem aute eiusmod est velit.
       </VCardText>
       <VCardText>
-        Elit aute eiusmod sint esse est laborum velit Lorem commodo fugiat. Occaecat ipsum consequat dolor culpa nisi.
-        Consectetur nostrud ut cillum exercitation in occaecat nisi eiusmod ipsum. Consectetur dolor officia Lorem non ut.
-        Incididunt non fugiat consequat ea exercitation est incididunt qui laboris amet. Lorem anim fugiat quis
-        exercitation qui eu id dolor elit do veniam aute eu mollit.
-      </VCardText>
-    </VCard>
-  </div>
-</template>
+        Laboris tempor tempor ex dolor reprehenderit ex veniam sunt ea voluptate elit officia culpa ipsum. Enim et
+        excepteur fugiat reprehenderit amet ex ea enim eu esse culpa sunt exercitation laboris. Minim voluptate esse sunt
+        minim cillum commodo pariatur ut excepteur minim. Consectetur consectetur anim quis laborum. Aliqua est proident
+        amet laboris enim do minim aliqua..
+    </VCardText>
+  </VCard>
+</div></template>

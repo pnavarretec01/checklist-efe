@@ -1,33 +1,59 @@
 <script setup>
-const currentTab = ref(1)
-const emit = defineEmits()
-const props = defineProps(['parentItems'])
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+
+const currentTab = ref(1);
+const emit = defineEmits();
+const props = defineProps(['parentItems']);
 
 const addCaracteristica = subitem => {
-  emit('addCaracteristica', subitem)
+  emit('addCaracteristica', subitem);
 }
+
 const removeEntry = (subitem, index) => {
-  emit('removeEntry', subitem, index)
+  emit('removeEntry', subitem, index);
 }
 
 watchEffect(() => {
   if (props.parentItems && props.parentItems.length > 0) {
-    currentTab.value = props.parentItems[0].id
+    currentTab.value = props.parentItems[0].id;
   }
-})
+});
 
+const isMobile = ref(window.innerWidth <= 768);
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+  handleResize();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+function handleResize() {
+  isMobile.value = window.innerWidth <= 768;
+}
 </script>
-
 <template>
   <VCard>
-    <VTabs next-icon="tabler-arrow-right" prev-icon="tabler-arrow-left" v-model="currentTab">
-      <VTab v-for="item in parentItems" :key="item.id" :value="item.id">
-        {{ item.nombre }}
-      </VTab>
-    </VTabs>
     <VCardText>
+      <!-- en movil -->
+      <div v-if="isMobile" v-for="item in parentItems" :key="item.id">
+        <VTabs v-model="currentTab">
+          <VTab :value="item.id">
+            {{ item.nombre }}
+          </VTab>
+        </VTabs>
+      </div>
+      <!-- en escritorio -->
+      <VTabs v-else next-icon="tabler-arrow-right" prev-icon="tabler-arrow-left" v-model="currentTab">
+        <VTab v-for="item in parentItems" :key="item.id" :value="item.id">
+          {{ item.nombre }}
+        </VTab>
+      </VTabs>
       <VWindow v-model="currentTab">
         <VWindowItem v-for="item in parentItems" :key="item.id" :value="item.id">
+          <h2 class="pa-5">{{ item.nombre }}</h2>
           <div v-for="(subitem, indexSubItem) in item.items" :key="indexSubItem">
             <h3>{{ subitem.nombre }}</h3>
             <VRow v-for="(dataSubitem, dataIndex) in subitem.data" :key="dataIndex" align="center" class="mb-2">
@@ -41,7 +67,7 @@ watchEffect(() => {
                 <VTextarea v-model="dataSubitem.observacion" rows="2" label="Observación" placeholder="Observación" />
               </VCol>
               <VCol cols="12" md="1">
-                <VBtn icon size="x-small" color="default" variant="text" @click="() => removeEntry(subitem, dataIndex)">
+                <VBtn v-if="!item.cerrado" icon size="x-small" color="default" variant="text" @click="() => removeEntry(subitem, dataIndex)">
                   <VIcon size="20" icon="tabler-x" />
                 </VBtn>
               </VCol>
@@ -49,10 +75,11 @@ watchEffect(() => {
             <VBtn v-if="!item.cerrado" @click="addCaracteristica(subitem)">
               Agregar
             </VBtn>
-
           </div>
         </VWindowItem>
       </VWindow>
     </VCardText>
   </VCard>
 </template>
+
+

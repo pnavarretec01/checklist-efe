@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, defineEmits, isRef } from 'vue';
+import { ref, watch, isRef } from 'vue';
 const emit = defineEmits();
 
 const props = defineProps({
@@ -129,7 +129,7 @@ const cancelAdding = () => {
                   </VCol>
                 </VListItemTitle>
               </VListItem>
-              <VDivider v-if="index !== subitem.length - 1" />
+              <VDivider v-if="index !== item.subitems.length - 1" />
             </template>
           </VList>
         </VContainer>

@@ -19,14 +19,14 @@ const closeDialog = () => {
   showDialog.value = false;
 };
 
-
 const {
   items,
   fetchItems,
   deleteData,
   snackbar,
   snackbarMessage,
-  snackbarColor
+  snackbarColor,
+  manualSync
 } = useChecklist();
 
 onMounted(fetchItems);
@@ -67,6 +67,7 @@ watch(options, newVal => {
 });
 
 const editItem = (item) => {
+  localStorage.setItem('formulario', JSON.stringify(item.value));
   router.push({ name: 'checklist-id', params: { id: item.value.pk_formulario_id } });
 }
 
@@ -86,6 +87,9 @@ const isClosed = (value) => {
       <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
         Crear Nuevo Checklist
       </VBtn>
+      <VBtn prepend-icon="mdi-sync" @click="manualSync">
+        Sincronizar
+      </VBtn>
     </div>
     <VRow>
       <VCol cols="12" offset-md="8" md="4">
@@ -98,6 +102,9 @@ const isClosed = (value) => {
       :page="options.page" :search="search" @update:options="options = $event">
       <template v-slot:item.actions="{ item }">
         <!-- <VIcon small @click="abrirSubitem(item)">mdi-plus-box-multiple</VIcon> -->
+        <VIcon v-if="item.needsSync" small class="me-2">mdi-sync-alert</VIcon>
+        <VIcon v-else small class="me-2">mdi-check</VIcon>
+        <VIcon v-else small class="me-2">mdi-check</VIcon>
         <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
         <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
       </template>

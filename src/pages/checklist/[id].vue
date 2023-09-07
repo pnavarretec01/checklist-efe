@@ -4,20 +4,32 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const id = ref(route.params.id);
+const formulario = ref(null);
+
+const isLoading = ref(true);
 
 onMounted(() => {
-  console.log('[id].vue montado');
+  const storedFormulario = localStorage.getItem('formulario');
+  formulario.value = storedFormulario ? JSON.parse(storedFormulario) : null;
+  isLoading.value = false; 
 });
-
-// Si necesitas el ID dentro de Checklist, puedes pasarlo como prop, asegúrate de que Checklist lo acepte.
 </script>
-
 <template>
   <div>
     <VCard title="Checklist">
-      <VCardText>
-        <Checklist :id="id" />
+      <VCardText v-if="isLoading">
+          <VProgressCircular
+            :size="60"
+            color="primary"
+            indeterminate
+          />
+      </VCardText>
+      <!-- Contenido del Checklist, solo se muestra cuando no está cargando -->
+      <VCardText v-else>
+        <Checklist :id="id" :formulario="formulario" />
       </VCardText>
     </VCard>
   </div>
 </template>
+
+

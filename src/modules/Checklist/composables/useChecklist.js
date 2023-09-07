@@ -1,6 +1,6 @@
 import axios from "axios";
 import { ref } from "vue";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 const apiURL = "http://localhost:3000/api/v1/";
 
@@ -11,19 +11,25 @@ export default function useChecklist(
   pkInicio,
   pkTermino,
   observacionGeneral,
-  itemId
+  itemId,
+  formulario
 ) {
-  
   const router = useRouter();
   const currentTab = ref(0);
   const items = ref([]);
   const error = ref(null);
   const parentItems = ref([]);
-  const cerrado = ref('')
+  const cerrado = ref("");
 
   const snackbar = ref(false);
   const snackbarMessage = ref("");
   const snackbarColor = ref("info");
+
+  const online = ref(navigator.onLine);
+
+  // Este es un watcher para detectar cambios en el estado de conexión.
+  window.addEventListener("online", () => (online.value = true));
+  window.addEventListener("offline", () => (online.value = false));
 
   // Mapea la estructura de los datos provenientes del API.
   const mapStructure = (apiData) => {
@@ -53,20 +59,42 @@ export default function useChecklist(
     }
   };
 
-  // Obtiene los items del API.
+  const storeItemsInLocalStorage = (items) => {
+    localStorage.setItem("checklist_datatabla", JSON.stringify(items));
+  };
+
+  const getItemsFromLocalStorage = () => {
+    return JSON.parse(localStorage.getItem("checklist_datatabla") || "[]");
+  };
+
   const fetchItems = async () => {
-    try {
-      const response = await axios.get(apiURL + "formularios");
-      items.value = response.data;
+    if (online.value) {
+      await syncPendingItems(); 
+      try {
+        const response = await axios.get(apiURL + "formularios");
+        items.value = response.data.map((item) => ({
+          ...item,
+          needsSync: false,
+        })); // Añadido para marcar como sincronizado
+        storeItemsInLocalStorage(items.value);
+
+        snackbar.value = true;
+        snackbarMessage.value = "Datos cargados con éxito!";
+        snackbarColor.value = "success";
+        return response.data.data;
+      } catch (err) {
+        error.value = err.message;
+        snackbar.value = true;
+        snackbarMessage.value = err.message;
+        snackbarColor.value = "error";
+      }
+    } else {
+      items.value = getItemsFromLocalStorage();
+
       snackbar.value = true;
-      snackbarMessage.value = "Datos cargados con éxito!";
-      snackbarColor.value = "success";
-      return response.data.data;
-    } catch (err) {
-      error.value = err.message;
-      snackbar.value = true;
-      snackbarMessage.value = err.message;
-      snackbarColor.value = "error";
+      snackbarMessage.value =
+        "Estás offline. Cargando datos desde el almacenamiento local!";
+      snackbarColor.value = "warning";
     }
   };
 
@@ -84,10 +112,41 @@ export default function useChecklist(
   };
 
   const saveData = async (cerrado) => {
-    await sendCaracteristicas({
-      parentItems: parentItems.value,
-      cerrado: cerrado,
-    });
+    if (online.value) {
+      await sendCaracteristicas({
+        parentItems: parentItems.value,
+        cerrado: cerrado,
+      });
+    } else {
+      // Si estás offline, guardar el ítem en localStorage.
+      const pendingItems = getItemsFromLocalStorage();
+      pendingItems.push({
+        ...dataToSend,
+        needsSync: true, // Marcar el ítem como pendiente de sincronización.
+      });
+      storeItemsInLocalStorage(pendingItems);
+      snackbar.value = true;
+      snackbarMessage.value =
+        "Guardado localmente. Se sincronizará cuando esté online.";
+      snackbarColor.value = "warning";
+    }
+  };
+
+  const syncPendingItems = async () => {
+    const pendingItems = getItemsFromLocalStorage().filter(
+      (item) => item.needsSync
+    );
+
+    for (const item of pendingItems) {
+      try {
+        await axios.post(apiURL + "formularios/addForm", item);
+        // Si se sincroniza con éxito, elimina la marca de sincronización pendiente.
+        item.needsSync = false;
+      } catch (err) {
+        console.error("Error al sincronizar:", err);
+      }
+    }
+    storeItemsInLocalStorage(pendingItems); // Actualizar localStorage.
   };
 
   // Envía las características al API.
@@ -123,7 +182,7 @@ export default function useChecklist(
       snackbar.value = true;
       snackbarMessage.value = "Checklist agregado con éxito";
       snackbarColor.value = "success";
-      router.push({ name: 'checklist-page' });
+      router.push({ name: "checklist-page" });
     } catch (err) {
       error.value = err.message;
       snackbar.value = true;
@@ -135,17 +194,18 @@ export default function useChecklist(
   // Obtiene el formulario por ID.
   const fetchFormDataById = async (id) => {
     try {
-      const response = await axios.get(apiURL + "formularios/" + id);
-      const formData = response.data;
-      nombreSupervisor.value = formData.data.nombre_supervisor;
-      fecha.value = formData.data.fecha;
-      subdivision.value = formData.data.subdivision;
-      pkInicio.value = formData.data.pk_inicio;
-      pkTermino.value = formData.data.pk_termino;
-      observacionGeneral.value = formData.data.observacion_general;
-      cerrado.value = formData.data.cerrado
+      // const response = await axios.get(apiURL + "formularios/" + id);
+      //const formData = response.data;
+      nombreSupervisor.value = formulario.nombre_supervisor;
+      fecha.value = formulario.fecha;
+      subdivision.value = formulario.subdivision;
+      pkInicio.value = formulario.pk_inicio;
+      pkTermino.value = formulario.pk_termino;
+      observacionGeneral.value = formulario.observacion_general;
+      cerrado.value = formulario.cerrado;
 
-      parentItems.value = mapStructure(formData.data);
+      parentItems.value = mapStructure(formulario);
+      //console.log(parentItems.value);
     } catch (err) {
       error.value = err.message;
       console.error("Error al obtener el formulario por ID:", err);
@@ -190,7 +250,7 @@ export default function useChecklist(
       snackbar.value = true;
       snackbarMessage.value = "Datos editados con éxito!";
       snackbarColor.value = "success";
-      router.push({ name: 'checklist-page' });
+      router.push({ name: "checklist-page" });
     } catch (err) {
       error.value = err.message;
       snackbar.value = true;
@@ -204,6 +264,11 @@ export default function useChecklist(
     try {
       const response = await axios.delete(apiURL + "formularios/" + id);
       if (response.data.success) {
+        const index = items.value.findIndex((i) => i.pk_formulario_id === id);
+        if (index !== -1) {
+          items.value.splice(index, 1);
+        }
+
         snackbar.value = true;
         snackbarMessage.value = "Checklist eliminado con éxito";
         snackbarColor.value = "success";
@@ -237,6 +302,6 @@ export default function useChecklist(
     snackbar,
     snackbarMessage,
     snackbarColor,
-    cerrado
+    cerrado,
   };
 }

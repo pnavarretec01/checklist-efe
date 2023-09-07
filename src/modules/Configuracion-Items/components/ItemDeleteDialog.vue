@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watchEffect, watch, defineEmits  } from 'vue';
+import { ref, watchEffect, watch  } from 'vue';
 
 const emit = defineEmits();
 
