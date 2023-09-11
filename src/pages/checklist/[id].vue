@@ -3,7 +3,7 @@ import Checklist from '@/modules/Checklist/components/Checklist.vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const id = ref(route.params.id);
+const id = ref(route.params.id || Math.floor(Math.random() * 9999));
 const formulario = ref(null);
 
 const isLoading = ref(true);

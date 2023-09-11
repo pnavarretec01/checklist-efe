@@ -1,5 +1,5 @@
 import axios from "axios";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const apiURL = import.meta.env.VITE_API_URL;
@@ -18,8 +18,8 @@ export default function useChecklist(
   const updateConnectionStatus = () => {
     isConnected.value = navigator.onLine;
     if (isConnected.value) {
-      console.log("Conexión a Internet restaurada!");
       alert("Conexión a Internet restaurada!");
+      syncOfflineData();
     } else {
       console.log("Sin Conexión a Internet!");
       alert("Sin Conexión a Internet!");
@@ -27,9 +27,7 @@ export default function useChecklist(
   };
 
   const manualSync = async () => {
-    console.log("sync");
-    await syncOfflineData();
-    await fetchItems();
+    syncOfflineData();
   };
 
   const pendingForms = getFromLocalStorage("formDataToSave") || [];
@@ -144,6 +142,7 @@ export default function useChecklist(
   const sendCaracteristicas = async (dataToSave) => {
     try {
       if (!isConnected.value) {
+        console.log("sin conexion?");
         const dataToSaveLocal = {
           formulario: {
             nombre_supervisor: nombreSupervisor.value,
@@ -153,7 +152,7 @@ export default function useChecklist(
             pk_termino: pkTermino.value,
             observacion_general: observacionGeneral.value,
             cerrado: dataToSave.cerrado,
-            needsSync: false,
+            needsSync: true,
           },
           features: [],
         };
@@ -197,7 +196,7 @@ export default function useChecklist(
         for (let item of parentItems.value) {
           for (let subitem of item.items) {
             for (let data of subitem.data) {
-              datatoPushTable.features.push({
+              datatoPushTable.items.push({
                 pk: data.pk,
                 collera: data.collera,
                 observacion: data.observacion,
@@ -207,8 +206,10 @@ export default function useChecklist(
             }
           }
         }
+        console.log("paso a pushear a tabla");
 
-        const storedChecklistData = getFromLocalStorage("checklist_datatabla") || [];
+        const storedChecklistData =
+          getFromLocalStorage("checklist_datatabla") || [];
         storedChecklistData.push(datatoPushTable);
         saveToLocalStorage("checklist_datatabla", storedChecklistData);
 
@@ -262,28 +263,35 @@ export default function useChecklist(
 
   const syncOfflineData = async () => {
     const offlineForms = getFromLocalStorage("formDataToSave");
-    console.log(offlineForms);
+
     if (offlineForms && isConnected.value) {
       for (let dataToSave of offlineForms) {
         try {
-          await sendCaracteristicas(dataToSave);
-        } catch (err) {
-          console.error("Error al sincronizar los datos:", err);
+          const response = await axios.post(
+            apiURL + "formularios/addForm",
+            dataToSave
+          );
+
           snackbar.value = true;
-          snackbarMessage.value =
-            "Error al sincronizar los datos guardados localmente.";
-          snackbarColor.value = "error";
+          snackbarMessage.value = "Datos sincronizados con éxito";
+          snackbarColor.value = "success";
+        } catch (err) {
+          console.error("syncOfflineData: Error al sincronizar", err);
         }
       }
+      // Una vez que hayamos intentado sincronizar todos los formularios, limpiamos el almacenamiento local.
       localStorage.removeItem("formDataToSave");
-      isSavedOffline.value = false;
+    } else {
+      snackbar.value = true;
+      snackbarMessage.value = "No hay datos para sincronizar";
+      snackbarColor.value = "warning";
     }
   };
 
   // Sincronizar datos guardados offline cuando hay conexión
-  watch(isConnected, (newValue) => {
-    if (newValue) syncOfflineData();
-  });
+  // watch(isConnected, (newValue) => {
+  //   if (newValue) syncOfflineData();
+  // });
 
   onMounted(fetchStructure);
 

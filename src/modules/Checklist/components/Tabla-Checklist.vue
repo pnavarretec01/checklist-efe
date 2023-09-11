@@ -12,7 +12,7 @@ const itemToDelete = ref({});
 
 const handleDelete = (item) => {
   deleteData(item.value.pk_formulario_id);
-  fetchItems();
+  //fetchItems();
   showDialog.value = false;
 };
 
@@ -24,14 +24,22 @@ const {
   items,
   fetchItems,
   deleteData,
-  snackbar,
-  snackbarMessage,
-  snackbarColor,
+  snackbar: snackbar1,
+  snackbarMessage: snackbarMessage1,
+  snackbarColor: snackbarColor1,
 } = useChecklist();
 
 const {
   manualSync,
+  snackbar: snackbar2,
+  snackbarMessage: snackbarMessage2,
+  snackbarColor: snackbarColor2,
 } = useChecklistNuevo();
+
+const sincronizar = () => {
+  manualSync()
+  fetchItems()
+}
 
 onMounted(fetchItems);
 
@@ -71,8 +79,10 @@ watch(options, newVal => {
 });
 
 const editItem = (item) => {
+  console.log(item.value);
+  const id = (item.value.pk_formulario_id || Math.floor(Math.random() * 9999))
   localStorage.setItem('formulario', JSON.stringify(item.value));
-  router.push({ name: 'checklist-id', params: { id: item.value.pk_formulario_id } });
+  router.push({ name: 'checklist-id', params: { id: id } });
 }
 
 const prepareDeleteItem = (item) => {
@@ -91,7 +101,7 @@ const isClosed = (value) => {
       <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
         Crear Nuevo Checklist
       </VBtn>
-      <VBtn prepend-icon="mdi-sync" @click="manualSync">
+      <VBtn prepend-icon="mdi-sync" @click="sincronizar">
         Sincronizar
       </VBtn>
     </div>
@@ -105,7 +115,7 @@ const isClosed = (value) => {
     <VDataTable :headers="headers" :items="items" :loading="loading" :items-per-page="options.itemsPerPage"
       :page="options.page" :search="search" @update:options="options = $event">
       <template v-slot:item.actions="{ item }">
-        <VIcon v-if="item.needsSync" small class="me-2">mdi-sync-alert</VIcon>
+        <VIcon v-if="item.value.needsSync" small class="me-2">mdi-sync-alert</VIcon>
         <VIcon v-else small class="me-2">mdi-check</VIcon>
         <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
         <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
@@ -137,8 +147,11 @@ const isClosed = (value) => {
 
     <DeleteConfirmationDialog v-if="itemToDelete" :dialog="showDialog" :item="itemToDelete" @closeDelete="closeDialog"
       @confirmDelete="handleDelete" />
-    <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
-      {{ snackbarMessage }}
+    <VSnackbar v-model="snackbar2" :color="snackbarColor2" location="top end" :timeout="2000">
+      {{ snackbarMessage2 }}
+    </VSnackbar>
+    <VSnackbar v-model="snackbar1" :color="snackbarColor1" location="top end" :timeout="2000">
+      {{ snackbarMessage1 }}
     </VSnackbar>
   </div>
 </template>
