@@ -245,7 +245,7 @@ export default function useChecklist(
       }
 
       const response = await axios.post(
-        apiURL + "formularios/addForm",
+        apiURL + "formularios/",
         dataToSend
       );
 
@@ -268,7 +268,7 @@ export default function useChecklist(
       for (let dataToSave of offlineForms) {
         try {
           const response = await axios.post(
-            apiURL + "formularios/addForm",
+            apiURL + "formularios/",
             dataToSave
           );
 

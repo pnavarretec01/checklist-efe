@@ -167,7 +167,7 @@ export default function useChecklist(
 
     for (const item of pendingItems) {
       try {
-        await axios.post(apiURL + "formularios/addForm", item);
+        await axios.post(apiURL + "formularios/", item);
         // Si se sincroniza con éxito, elimina la marca de sincronización pendiente.
         item.needsSync = false;
       } catch (err) {
@@ -204,7 +204,7 @@ export default function useChecklist(
 
     try {
       const response = await axios.post(
-        apiURL + "formularios/addForm",
+        apiURL + "formularios/",
         dataToSend
       );
       snackbar.value = true;

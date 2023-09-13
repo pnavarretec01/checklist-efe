@@ -1,9 +1,9 @@
 import axios from "axios";
 import { ref } from "vue";
 
-const apiURL = "http://localhost:3000/api/v1/items";
-const apiURLSubItems = "http://localhost:3000/api/v1/subitems";
-const apiBack = "http://localhost:3000/api/v1/";
+const apiBaseURL = import.meta.env.VITE_API_URL
+const apiURL = `${apiBaseURL}items`;
+const apiURLSubItems = `${apiBaseURL}subitems`;
 
 export function useItemsApi() {
   const items = ref([]);
@@ -17,7 +17,7 @@ export function useItemsApi() {
       return response.data.data;
     } catch (err) {
       error.value = err.message;
-      console.error("Error fetching items:", err);
+      console.error("Error al obtener los items", err);
     }
   };
 
@@ -76,7 +76,7 @@ export function useItemsApi() {
       return response.data;
     } catch (err) {
       error.value = err.message;
-      console.error(`Error fetching subitems for item ${itemId}:`, err);
+      console.error(`Error al obtener subitems`, err);
     }
   };
 
@@ -86,15 +86,11 @@ export function useItemsApi() {
         `${apiURLSubItems}/${itemId}`,
         subitemData
       );
-      // const index = items.value.findIndex((i) => i.pk_item_id === itemId);
-      // if (index !== -1) {
-      //   items.value[index].subitems.unshift(response.data.data);
-      // }
       return response;
     } catch (err) {
-      throw new Error(err.response?.data?.message || err.message || "Error desconocido al crear subitem");
+      throw err;
     }
-};
+  };
 
 
   async function apiUpdateSubitem(itemId, subitemId, subitemData) {
