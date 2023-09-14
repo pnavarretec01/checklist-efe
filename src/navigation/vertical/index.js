@@ -16,6 +16,7 @@ export default [
   },
   {
     title: 'Sub divisiones',
+    to: { name: 'subdivisiones-page' },
     icon: { icon: 'tabler-arrow-autofit-content' },
   },
 ]
