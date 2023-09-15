@@ -37,7 +37,7 @@ const guardar = () => {
   <VDialog v-model="localDialog" width="500" @click:outside="close">
     <DialogCloseBtn @click="close" />
 
-    <VCard :title="item && item.id ? 'Editar Sub-División' : 'Crear Sub-División'">
+    <VCard :title="item && item.pk_subdivision_id ? 'Editar Sub-División' : 'Crear Sub-División'">
       <VCardText>
         <VRow>
           <VCol cols="12" sm="12" md="12">

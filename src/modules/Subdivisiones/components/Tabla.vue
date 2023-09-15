@@ -11,7 +11,11 @@ const search = ref('')
 const abrirDialog = ref(false);
 const abrirDialogEliminar = ref(false);
 
-const { data, fetchItems, createItem } = useApis();
+const snackbar = ref(false);
+const snackbarColor = ref("succes");
+const snackbarMessage = ref("");
+
+const { data, fetchItems, createItem, editItem, deleteItemApi } = useApis(snackbar, snackbarColor, snackbarMessage);
 const {
   itemEditar,
   guardar,
@@ -22,7 +26,8 @@ const {
   confirmarEliminar,
   closeDelete,
   abrirEliminarItem
-} = useLogica(data, abrirDialog, abrirDialogEliminar, createItem);
+} = useLogica(data, abrirDialog, abrirDialogEliminar, createItem, editItem, deleteItemApi, snackbar, snackbarColor, snackbarMessage);
+
 
 const headers = [
   {
@@ -113,5 +118,8 @@ onMounted(fetchItems);
     <serviciosDialog :item="itemEditar" :dialog="abrirDialog" @close="close" @guardarItem="guardar" />
     <serviciosDialogEliminar :item="itemEditar" :dialog="abrirDialogEliminar" @closeDelete="closeDelete"
       @confirmarEliminar="confirmarEliminar" />
+    <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
+      {{ snackbarMessage }}
+    </VSnackbar>
   </div>
 </template>

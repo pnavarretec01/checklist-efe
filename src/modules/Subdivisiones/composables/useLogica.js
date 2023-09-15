@@ -1,6 +1,13 @@
 import { ref } from "vue";
 
-export const useLogica = (data, abrirDialog, abrirDialogEliminar, createItem) => {
+export const useLogica = (
+  data,
+  abrirDialog,
+  abrirDialogEliminar,
+  createItem,
+  editItem,
+  deleteItemApi
+) => {
   const itemEditar = ref({
     nombre: "",
     pk_inicio: null,
@@ -9,41 +16,50 @@ export const useLogica = (data, abrirDialog, abrirDialogEliminar, createItem) =>
 
   const servicioExiste = (nombre, excludeId = null) => {
     return data.value.some((item) => {
-      if (excludeId && item.id === excludeId) {
+      if (excludeId && item.pk_subdivision_id === excludeId) {
         return false;
       }
-      return item.categoria.toLowerCase() === nombre.toLowerCase();
+      if (typeof nombre === "string" && item.nombre) {
+        return item.nombre.toLowerCase() === nombre.toLowerCase();
+      }
+      return item.nombre === nombre;
     });
   };
 
   const guardar = async () => {
-    const { id, nombre, pk_inicio, pk_termino } = itemEditar.value;
+    const { pk_subdivision_id, nombre, pk_inicio, pk_termino } = itemEditar.value;
 
-    if (servicioExiste(nombre, id)) {
+    if (servicioExiste(nombre, pk_subdivision_id)) {
       alert("Este Servicio ya existe!");
       return;
     }
 
-    if (id) {
-      const index = data.value.findIndex((item) => item.id === id);
-      if (index !== -1) {
-        data.value[index] = { ...itemEditar.value };
+    try {
+      if (pk_subdivision_id) {
+        await editItem(itemEditar.value);
+        const index = data.value.findIndex(
+          (item) => item.pk_subdivision_id === pk_subdivision_id
+        );
+        if (index !== -1) {
+          data.value[index] = { ...itemEditar.value };
+        }
+      } else {
+        const item = {
+          nombre: nombre,
+          pk_inicio: pk_inicio,
+          pk_termino: pk_termino,
+        };
+        await createItem(item);
       }
-    } else {
-      const item = {
-        nombre: nombre,
-        pk_inicio: pk_inicio,
-        pk_termino: pk_termino,
-      };
-      createItem(item);
-      return
-      data.value.unshift(item);
+      close();
+    } catch (error) {
+      console.error("Hubo un error al guardar el servicio.", error);
     }
   };
 
   const abrirEditarItem = (item) => {
     itemEditar.value = {
-      id: item.raw.id,
+      pk_subdivision_id: item.raw.pk_subdivision_id,
       nombre: item.raw.nombre,
       pk_inicio: item.raw.pk_inicio,
       pk_termino: item.raw.pk_termino,
@@ -76,10 +92,19 @@ export const useLogica = (data, abrirDialog, abrirDialogEliminar, createItem) =>
     abrirDialogEliminar.value = true;
   };
 
-  const confirmarEliminar = (itemId) => {
-    const index = data.value.findIndex((item) => item.id === itemId.id);
-    data.value.splice(index, 1);
-    closeDelete();
+  const confirmarEliminar = async (itemId) => {
+    try {
+      await deleteItemApi(itemId.id.pk_subdivision_id);
+      const index = data.value.findIndex(
+        (item) => item.pk_subdivision_id === itemId.id.pk_subdivision_id
+      );
+      if (index !== -1) {
+        data.value.splice(index, 1);
+      }
+      closeDelete();
+    } catch (error) {
+      console.error("Hubo un error al eliminar el servicio.", error);
+    }
   };
 
   return {
