@@ -22,6 +22,7 @@ const {
   snackbar,
   snackbarMessage,
   snackbarColor,
+  subdivisions
 } = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral);
 </script>
 
@@ -59,6 +60,19 @@ const {
         <VCol cols="12">
           <VTextarea v-model="observacionGeneral" rows="3" label="Observación general"></VTextarea>
         </VCol>
+        <VCol cols="12" md="6">
+          <VCol cols="12" md="6">
+            <VCol cols="12" md="6">
+              <VSelect v-model="subdivision" :items="subdivisions" item-text="nombre" item-value="pk_subdivision_id"
+                label="Subdivisión" variant="underlined" />
+            </VCol>
+
+          </VCol>
+
+        </VCol>
+
+
+
       </VRow>
     </div>
   </div>

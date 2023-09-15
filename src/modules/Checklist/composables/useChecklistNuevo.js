@@ -53,6 +53,36 @@ export default function useChecklist(
 
   const parentItems = ref([]);
 
+  const subdivisions = ref([]);
+
+  const fetchSubdivisions = async () => {
+    try {
+      const response = await axios.get(apiURL + "subdivision");
+      if (response.data.success) {
+        subdivisions.value = response.data.data;
+        saveToLocalStorage("subdivisionsData", subdivisions.value);
+      } else {
+        console.error("Error obteniendo subdivisiones");
+        // Intenta recuperar del caché
+        const cachedData = getFromLocalStorage("subdivisionsData");
+        if (cachedData) {
+          subdivisions.value = cachedData;
+          console.log(
+            "Uso de datos de subdivisiones almacenados en caché de LocalStorage debido a un error de API"
+          );
+        }
+      }
+    } catch (err) {
+      const cachedData = getFromLocalStorage("subdivisionsData");
+      if (cachedData) {
+        subdivisions.value = cachedData;
+        console.log("Usando datos de subdivisiones precargadas");
+      } else {
+        error.value = "Error obteniendo subdivisiones: " + err.message;
+      }
+    }
+  };
+
   const mapStructure = (apiData) => {
     return apiData.map((item) => ({
       id: item.pk_item_id,
@@ -244,10 +274,7 @@ export default function useChecklist(
         }
       }
 
-      const response = await axios.post(
-        apiURL + "formularios/",
-        dataToSend
-      );
+      const response = await axios.post(apiURL + "formularios/", dataToSend);
 
       snackbar.value = true;
       snackbarMessage.value = "Datos cargados con éxito!";
@@ -293,7 +320,10 @@ export default function useChecklist(
   //   if (newValue) syncOfflineData();
   // });
 
-  onMounted(fetchStructure);
+  onMounted(() => {
+    fetchStructure();
+    fetchSubdivisions();
+  });
 
   return {
     items,
@@ -311,5 +341,6 @@ export default function useChecklist(
     isSavedOffline,
     syncOfflineData,
     manualSync,
+    subdivisions,
   };
 }
