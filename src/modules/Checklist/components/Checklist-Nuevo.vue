@@ -6,11 +6,22 @@ import TabsComponent from './TabsComponent.vue'
 import logoEfe from '../../../assets/images/logo-efe.svg'
 
 const nombreSupervisor = ref('');
-const fecha = ref('');
+const fecha = ref(formatDateTime(new Date()));
 const subdivision = ref('');
 const pkInicio = ref(null);
 const pkTermino = ref(null);
 const observacionGeneral = ref('');
+const subseleccionado = ref([]);
+
+function formatDateTime(date) {
+  const YYYY = date.getFullYear();
+  const MM = String(date.getMonth() + 1).padStart(2, '0');
+  const DD = String(date.getDate()).padStart(2, '0');
+  const HH = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  return `${YYYY}-${MM}-${DD}T${HH}:${mm}`;
+}
+
 
 const {
   currentTab,
@@ -23,7 +34,7 @@ const {
   snackbarMessage,
   snackbarColor,
   subdivisions
-} = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral);
+} = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral, subseleccionado);
 </script>
 
 
@@ -46,7 +57,7 @@ const {
           <VTextField v-model="nombreSupervisor" rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor" />
         </VCol>
         <VCol cols="12" md="6">
-          <VTextField v-model="fecha" type="date" label="Fecha" />
+          <VTextField v-model="fecha" type="datetime-local" label="Fecha" />
         </VCol>
         <VCol cols="12" md="6">
           <VTextField v-model="subdivision" rows="2" label="Subdivisión" placeholder="Subdivisión" />
@@ -57,22 +68,18 @@ const {
         <VCol cols="12" md="3" sm="4">
           <VTextField v-model="pkTermino" type="number" label="Pk Término" />
         </VCol>
-        <VCol cols="12">
-          <VTextarea v-model="observacionGeneral" rows="3" label="Observación general"></VTextarea>
+        <VCol cols="12" md="6">
+          <v-autocomplete :items="subdivisions" item-title="nombre" label="Subdivisión" v-model="subseleccionado"
+            return-object clearable>
+            <template v-slot:no-data>
+              <div class="px-4">No existen datos</div>
+            </template>
+          </v-autocomplete>
+
         </VCol>
         <VCol cols="12" md="6">
-          <VCol cols="12" md="6">
-            <VCol cols="12" md="6">
-              <VSelect v-model="subdivision" :items="subdivisions" item-text="nombre" item-value="pk_subdivision_id"
-                label="Subdivisión" variant="underlined" />
-            </VCol>
-
-          </VCol>
-
+          <VTextarea v-model="observacionGeneral" rows="3" label="Observación general"></VTextarea>
         </VCol>
-
-
-
       </VRow>
     </div>
   </div>

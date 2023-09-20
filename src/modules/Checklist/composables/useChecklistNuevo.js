@@ -10,7 +10,8 @@ export default function useChecklist(
   subdivision,
   pkInicio,
   pkTermino,
-  observacionGeneral
+  observacionGeneral,
+  subseleccionado
 ) {
   const isConnected = ref(navigator.onLine);
   const isSavedOffline = ref(false);
@@ -181,6 +182,7 @@ export default function useChecklist(
             pk_inicio: pkInicio.value,
             pk_termino: pkTermino.value,
             observacion_general: observacionGeneral.value,
+            subdivision: subseleccionado,
             cerrado: dataToSave.cerrado,
             needsSync: true,
           },
@@ -218,6 +220,7 @@ export default function useChecklist(
           pk_inicio: pkInicio.value,
           pk_termino: pkTermino.value,
           observacion_general: observacionGeneral.value,
+          subdivision: subseleccionado,
           cerrado: dataToSave.cerrado,
           needsSync: true,
 
@@ -256,6 +259,7 @@ export default function useChecklist(
           pk_termino: pkTermino.value,
           observacion_general: observacionGeneral.value,
           cerrado: dataToSave.cerrado,
+          subdivision: subseleccionado
         },
         features: [],
       };
