@@ -178,11 +178,10 @@ export default function useChecklist(
           formulario: {
             nombre_supervisor: nombreSupervisor.value,
             fecha: fecha.value,
-            subdivision: subdivision.value,
             pk_inicio: pkInicio.value,
             pk_termino: pkTermino.value,
             observacion_general: observacionGeneral.value,
-            subdivision: subseleccionado,
+            subdivision: subseleccionado.value.pk_subdivision_id,
             cerrado: dataToSave.cerrado,
             needsSync: true,
           },
@@ -216,11 +215,10 @@ export default function useChecklist(
         const datatoPushTable = {
           nombre_supervisor: nombreSupervisor.value,
           fecha: fecha.value,
-          subdivision: subdivision.value,
           pk_inicio: pkInicio.value,
           pk_termino: pkTermino.value,
           observacion_general: observacionGeneral.value,
-          subdivision: subseleccionado,
+          subdivision: subseleccionado.value.pk_subdivision_id,
           cerrado: dataToSave.cerrado,
           needsSync: true,
 
@@ -254,12 +252,11 @@ export default function useChecklist(
         formulario: {
           nombre_supervisor: nombreSupervisor.value,
           fecha: fecha.value,
-          subdivision: subdivision.value,
           pk_inicio: pkInicio.value,
           pk_termino: pkTermino.value,
           observacion_general: observacionGeneral.value,
           cerrado: dataToSave.cerrado,
-          subdivision: subseleccionado
+          subdivision: subseleccionado.value.pk_subdivision_id,
         },
         features: [],
       };

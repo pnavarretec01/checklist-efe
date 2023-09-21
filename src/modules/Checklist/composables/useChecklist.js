@@ -12,7 +12,8 @@ export default function useChecklist(
   pkTermino,
   observacionGeneral,
   itemId,
-  formulario
+  formulario,
+  subseleccionado
 ) {
   const isConnected = ref(navigator.onLine);
   const router = useRouter();
@@ -28,6 +29,36 @@ export default function useChecklist(
 
   const online = ref(navigator.onLine);
 
+  const subdivisions = ref([]);
+
+  const fetchSubdivisions = async () => {
+    try {
+      const response = await axios.get(apiURL + "subdivision");
+      if (response.data.success) {
+        subdivisions.value = response.data.data;
+        saveToLocalStorage("subdivisionsData", subdivisions.value);
+      } else {
+        console.error("Error obteniendo subdivisiones");
+        // Intenta recuperar del caché
+        const cachedData = getFromLocalStorage("subdivisionsData");
+        if (cachedData) {
+          subdivisions.value = cachedData;
+          console.log(
+            "Uso de datos de subdivisiones almacenados en caché de LocalStorage debido a un error de API"
+          );
+        }
+      }
+    } catch (err) {
+      const cachedData = getFromLocalStorage("subdivisionsData");
+      if (cachedData) {
+        subdivisions.value = cachedData;
+        console.log("Usando datos de subdivisiones precargadas");
+      } else {
+        error.value = "Error obteniendo subdivisiones: " + err.message;
+      }
+    }
+  };
+
   // Este es un watcher para detectar cambios en el estado de conexión.
   window.addEventListener("online", () => (online.value = true));
   window.addEventListener("offline", () => (online.value = false));
@@ -41,6 +72,7 @@ export default function useChecklist(
   };
 
   onMounted(() => {
+    fetchSubdivisions();
     window.addEventListener("online", updateConnectionStatus);
     window.addEventListener("offline", updateConnectionStatus);
   });
@@ -187,6 +219,7 @@ export default function useChecklist(
         pk_inicio: pkInicio.value,
         pk_termino: pkTermino.value,
         observacion_general: observacionGeneral.value,
+        subdivision: subseleccionado.value.pk_subdivision_id,
         cerrado: dataToSave.cerrado,
       },
       features: parentItems.value.flatMap((item) =>
@@ -203,10 +236,7 @@ export default function useChecklist(
     };
 
     try {
-      const response = await axios.post(
-        apiURL + "formularios/",
-        dataToSend
-      );
+      const response = await axios.post(apiURL + "formularios/", dataToSend);
       snackbar.value = true;
       snackbarMessage.value = "Checklist agregado con éxito";
       snackbarColor.value = "success";
@@ -230,6 +260,7 @@ export default function useChecklist(
       pkInicio.value = formulario.pk_inicio;
       pkTermino.value = formulario.pk_termino;
       observacionGeneral.value = formulario.observacion_general;
+      subseleccionado.value = formulario.subdivision;
       cerrado.value = formulario.cerrado;
 
       parentItems.value = mapStructure(formulario);
@@ -239,7 +270,6 @@ export default function useChecklist(
       console.error("Error al obtener el formulario por ID:", err);
     }
   };
-
 
   const updateItemInLocalStorage = (item) => {
     const localItems = getItemsFromLocalStorage();
@@ -252,47 +282,50 @@ export default function useChecklist(
     storeItemsInLocalStorage(localItems);
   };
 
-const updateData = async (cerrado) => {
-  if (online.value) {
-    await updateCaracteristicas(cerrado);
-  } else {
-    if (!itemId.value) {
-      // Si no tiene un ID, es un nuevo registro que aún no ha sido subido.
-      updateItemInLocalStorage({
-        ...parentItems.value,
-        nombre_supervisor: nombreSupervisor.value,
-        fecha: fecha.value,
-        subdivision: subdivision.value,
-        pk_inicio: pkInicio.value,
-        pk_termino: pkTermino.value,
-        observacion_general: observacionGeneral.value,
-        cerrado: cerrado,
-        needsSync: true,
-      });
-      snackbar.value = true;
-      snackbarMessage.value = "Edición guardada localmente.";
-      snackbarColor.value = "warning";
+  const updateData = async (cerrado) => {
+    if (online.value) {
+      await updateCaracteristicas(cerrado);
     } else {
-      // Tiene un ID, por lo que marcamos para ser sincronizado luego.
-      const itemToUpdate = {
-        ...parentItems.value,
-        pk_formulario_id: itemId.value,
-        nombre_supervisor: nombreSupervisor.value,
-        fecha: fecha.value,
-        subdivision: subdivision.value,
-        pk_inicio: pkInicio.value,
-        pk_termino: pkTermino.value,
-        observacion_general: observacionGeneral.value,
-        cerrado: cerrado,
-        needsSync: true,
-      };
-      storeEditedItemsInLocalStorage(itemToUpdate);
-      snackbar.value = true;
-      snackbarMessage.value = "Edición guardada localmente. Se sincronizará cuando esté online.";
-      snackbarColor.value = "warning";
+      if (!itemId.value) {
+        // Si no tiene un ID, es un nuevo registro que aún no ha sido subido.
+        updateItemInLocalStorage({
+          ...parentItems.value,
+          nombre_supervisor: nombreSupervisor.value,
+          fecha: fecha.value,
+          subdivision: subdivision.value,
+          pk_inicio: pkInicio.value,
+          pk_termino: pkTermino.value,
+          observacion_general: observacionGeneral.value,
+          subdivision: subseleccionado.value.pk_subdivision_id,
+          cerrado: cerrado,
+          needsSync: true,
+        });
+        snackbar.value = true;
+        snackbarMessage.value = "Edición guardada localmente.";
+        snackbarColor.value = "warning";
+      } else {
+        // Tiene un ID, por lo que marcamos para ser sincronizado luego.
+        const itemToUpdate = {
+          ...parentItems.value,
+          pk_formulario_id: itemId.value,
+          nombre_supervisor: nombreSupervisor.value,
+          fecha: fecha.value,
+          subdivision: subdivision.value,
+          pk_inicio: pkInicio.value,
+          pk_termino: pkTermino.value,
+          observacion_general: observacionGeneral.value,
+          subdivision: subseleccionado.value.pk_subdivision_id,
+          cerrado: cerrado,
+          needsSync: true,
+        };
+        storeEditedItemsInLocalStorage(itemToUpdate);
+        snackbar.value = true;
+        snackbarMessage.value =
+          "Edición guardada localmente. Se sincronizará cuando esté online.";
+        snackbarColor.value = "warning";
+      }
     }
-  }
-};
+  };
 
   // Actualiza las características en el API.
   const updateCaracteristicas = async (cerrado) => {
@@ -304,6 +337,7 @@ const updateData = async (cerrado) => {
       pk_inicio: pkInicio.value,
       pk_termino: pkTermino.value,
       observacion_general: observacionGeneral.value,
+      subdivision: subseleccionado.value.pk_subdivision_id,
       cerrado: cerrado,
       items: parentItems.value.map((item) => ({
         pk_item_id: item.id,
@@ -463,5 +497,6 @@ const updateData = async (cerrado) => {
     snackbarMessage,
     snackbarColor,
     cerrado,
+    subdivisions,
   };
 }

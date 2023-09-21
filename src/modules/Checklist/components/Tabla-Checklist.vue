@@ -7,6 +7,11 @@ import DeleteConfirmationDialog from './DeleteConfirmationDialog.vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
+import useExportData from '../composables/useExportData';
+
+const { exportData } = useExportData();
+
+
 const showDialog = ref(false);
 const itemToDelete = ref({});
 
@@ -48,6 +53,7 @@ const headers = [
   { title: 'Fecha', key: 'fecha' },
   { title: 'PK Inicio', key: 'pk_inicio' },
   { title: 'PK Termino', key: 'pk_termino' },
+  { title: 'Sub División', key: 'subdivision' },
   { title: 'Observación', key: 'observacion_general' },
   { title: 'Estado', key: 'cerrado' },
   { title: 'Acciones', key: 'actions' },
@@ -79,7 +85,6 @@ watch(options, newVal => {
 });
 
 const editItem = (item) => {
-  console.log(item.value);
   const id = (item.value.pk_formulario_id || Math.floor(Math.random() * 9999))
   localStorage.setItem('formulario', JSON.stringify(item.value));
   router.push({ name: 'checklist-id', params: { id: id } });
@@ -92,7 +97,6 @@ const prepareDeleteItem = (item) => {
 const isClosed = (value) => {
   return value === true || value === 1;
 };
-
 </script>
 
 <template>
@@ -114,11 +118,34 @@ const isClosed = (value) => {
 
     <VDataTable :headers="headers" :items="items" :loading="loading" :items-per-page="options.itemsPerPage"
       :page="options.page" :search="search" @update:options="options = $event">
+
       <template v-slot:item.actions="{ item }">
+        <VBtn icon variant="text" size="small" color="medium-emphasis">
+          <VIcon size="24" icon="tabler-dots-vertical" />
+          <VMenu activator="parent">
+            <VList>
+              <VListItem @click="exportData(item.value, 'csv')">
+                <template #prepend>
+                  <VIcon icon="mdi-file-export" />
+                </template>
+                <VListItemTitle>CSV</VListItemTitle>
+              </VListItem>
+              <VListItem @click="exportData(item.value, 'xlsx')">
+                <template #prepend>
+                  <VIcon icon="mdi-file-export" />
+                </template>
+                <VListItemTitle>XLSX</VListItemTitle>
+              </VListItem>
+            </VList>
+          </VMenu>
+        </VBtn>
         <VIcon v-if="item.value.needsSync" small class="me-2">mdi-sync-alert</VIcon>
         <VIcon v-else small class="me-2">mdi-check</VIcon>
         <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
         <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
+      </template>
+      <template v-slot:item.subdivision="{ item }">
+        {{ item.value.subdivision.nombre }}
       </template>
       <template v-slot:item.cerrado="{ item }">
         <span :class="['badge', isClosed(item.value.cerrado) ? 'badge-success' : 'badge-warning']">

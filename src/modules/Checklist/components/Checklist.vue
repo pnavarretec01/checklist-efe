@@ -26,6 +26,12 @@ const subdivision = ref('');
 const pkInicio = ref(null);
 const pkTermino = ref(null);
 const observacionGeneral = ref('');
+const subseleccionado = ref([]);
+
+watch(subseleccionado, (nuevoValor, oldName) => {
+  pkInicio.value = nuevoValor.pk_inicio
+  pkTermino.value = nuevoValor.pk_termino
+});
 
 const {
   currentTab,
@@ -38,8 +44,9 @@ const {
   snackbar,
   snackbarMessage,
   snackbarColor,
-  cerrado
-} = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral, itemId, props.formulario);
+  cerrado,
+  subdivisions
+} = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral, itemId, props.formulario, subseleccionado);
 
 onMounted(() => {
   fetchFormDataById(id.value);
@@ -61,22 +68,28 @@ onMounted(() => {
     <div class="pt-5 pb-5 flex-grow-1">
       <VRow>
         <VCol cols="12" md="6">
-          <VTextField v-model="nombreSupervisor" rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor" />
+          <VTextField v-model="nombreSupervisor" rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor"
+            :readonly="cerrado" />
         </VCol>
         <VCol cols="12" md="6">
-          <VTextField v-model="fecha" type="date" label="Fecha" />
+          <VTextField v-model="fecha" type="date" label="Fecha" :readonly="cerrado" />
         </VCol>
         <VCol cols="12" md="6">
-          <VTextField v-model="subdivision" rows="2" label="Subdivisión" placeholder="Subdivisión" />
+          <v-autocomplete :items="subdivisions" item-title="nombre" label="Subdivisión" v-model="subseleccionado"
+            return-object clearable :disabled="cerrado">
+            <template v-slot:no-data>
+              <div class="px-4">No existen datos</div>
+            </template>
+          </v-autocomplete>
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" />
+          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" :readonly="cerrado" />
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkTermino" type="number" label="Pk Término" />
+          <VTextField v-model="pkTermino" type="number" label="Pk Término" :readonly="cerrado" />
         </VCol>
         <VCol cols="12">
-          <VTextarea v-model="observacionGeneral" rows="3" label="Observación general"></VTextarea>
+          <VTextarea v-model="observacionGeneral" rows="3" label="Observación general" :readonly="cerrado"></VTextarea>
         </VCol>
       </VRow>
     </div>
