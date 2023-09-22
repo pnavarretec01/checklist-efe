@@ -83,10 +83,10 @@ onMounted(() => {
           </v-autocomplete>
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" :readonly="cerrado" />
+          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" disabled />
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkTermino" type="number" label="Pk Término" :readonly="cerrado" />
+          <VTextField v-model="pkTermino" type="number" label="Pk Término" disabled />
         </VCol>
         <VCol cols="12">
           <VTextarea v-model="observacionGeneral" rows="3" label="Observación general" :readonly="cerrado"></VTextarea>

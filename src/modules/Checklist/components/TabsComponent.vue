@@ -3,7 +3,11 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 const currentTab = ref(1);
 const emit = defineEmits();
-const props = defineProps(['parentItems']);
+const props = defineProps(['parentItems', 'pkInicio', 'pkTermino']);
+
+const snackbar = ref(false);
+const snackbarColor = ref('error');
+const snackbarMessage = ref('');
 
 const addCaracteristica = subitem => {
   emit('addCaracteristica', subitem);
@@ -33,6 +37,36 @@ onBeforeUnmount(() => {
 function handleResize() {
   isMobile.value = window.innerWidth <= 768;
 }
+
+watch(() => props.parentItems, (newItems) => {
+  setTimeout(() => {
+    newItems.forEach(item => {
+      item.items.forEach(subitem => {
+        subitem.data.forEach(dataSubitem => {
+          let minPK, maxPK;
+          // subdivision editar o nueva
+          if (props.pkInicio && props.pkTermino) {
+            minPK = props.pkInicio;
+            maxPK = props.pkTermino;
+          } else if (item.subdivision) {
+            minPK = item.subdivision.pk_inicio;
+            maxPK = item.subdivision.pk_termino;
+          }
+          // validacion
+          if (minPK && dataSubitem.pk < minPK) {
+            dataSubitem.pk = minPK;
+            snackbarMessage.value = `El PK mínimo permitido es ${minPK}`;
+            snackbar.value = true;
+          } else if (maxPK && dataSubitem.pk > maxPK) {
+            dataSubitem.pk = maxPK;
+            snackbarMessage.value = `El PK máximo permitido es ${maxPK}`;
+            snackbar.value = true;
+          }
+        });
+      });
+    });
+  }, 1000);
+}, { deep: true });
 </script>
 <template>
   <VCard>
@@ -58,7 +92,7 @@ function handleResize() {
             <h3>{{ subitem.nombre }}</h3>
             <VRow v-for="(dataSubitem, dataIndex) in subitem.data" :key="dataIndex" align="center" class="mb-2">
               <VCol cols="6" md="3">
-                <VTextField v-model="dataSubitem.pk" type="number" label="PK" />
+                <VTextField v-model.number="dataSubitem.pk" type="number" label="PK" />
               </VCol>
               <VCol cols="6" md="3">
                 <VTextField v-model="dataSubitem.collera" type="number" label="Collera" />
@@ -67,7 +101,8 @@ function handleResize() {
                 <VTextarea v-model="dataSubitem.observacion" rows="2" label="Observación" placeholder="Observación" />
               </VCol>
               <VCol cols="12" md="1">
-                <VBtn v-if="!item.cerrado" icon size="x-small" color="default" variant="text" @click="() => removeEntry(subitem, dataIndex)">
+                <VBtn v-if="!item.cerrado" icon size="x-small" color="default" variant="text"
+                  @click="() => removeEntry(subitem, dataIndex)">
                   <VIcon size="20" icon="tabler-x" />
                 </VBtn>
               </VCol>
@@ -79,6 +114,9 @@ function handleResize() {
         </VWindowItem>
       </VWindow>
     </VCardText>
+    <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
+      {{ snackbarMessage }}
+    </VSnackbar>
   </VCard>
 </template>
 

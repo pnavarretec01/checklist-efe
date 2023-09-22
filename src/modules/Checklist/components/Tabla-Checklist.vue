@@ -3,14 +3,10 @@
 import { VDataTable } from 'vuetify/labs/VDataTable'
 import useChecklist from '../composables/useChecklist'
 import useChecklistNuevo from '../composables/useChecklistNuevo'
+import useExportData from '../composables/useExportData';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog.vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
-
-import useExportData from '../composables/useExportData';
-
-const { exportData } = useExportData();
-
 
 const showDialog = ref(false);
 const itemToDelete = ref({});
@@ -24,6 +20,8 @@ const handleDelete = (item) => {
 const closeDialog = () => {
   showDialog.value = false;
 };
+
+const { exportData } = useExportData();
 
 const {
   items,
@@ -152,7 +150,6 @@ const isClosed = (value) => {
           {{ isClosed(item.value.cerrado) ? 'Cerrado' : 'Abierto' }}
         </span>
       </template>
-
       <template v-slot:no-data>
         No hay datos disponibles.
       </template>

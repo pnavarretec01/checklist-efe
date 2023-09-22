@@ -85,7 +85,7 @@ const {
     </div>
   </div>
   <TabsComponent v-model:current-tab="currentTab" :parent-items="parentItems" @addCaracteristica="addCaracteristica"
-    @removeEntry="removeEntry" />
+    @removeEntry="removeEntry" :pk-inicio="pkInicio" :pk-termino="pkTermino"/>
   <div class="mt-2 mb-2">
     <hr>
     <VBtn color="primary" @click="() => saveData(0)">

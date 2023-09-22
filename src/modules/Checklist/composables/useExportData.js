@@ -45,7 +45,6 @@ export default function useExportData() {
     const rows = [];
     let lastItemName = "";
     let lastSubitemName = "";
-    console.log(data);
 
     data.items.forEach((item) => {
       item.subitems.forEach((subitem) => {

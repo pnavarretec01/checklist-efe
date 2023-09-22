@@ -161,7 +161,48 @@ export default function useChecklist(
     subitem.data.splice(index, 1);
   };
 
+  function validateForm() {
+    if (!nombreSupervisor.value) {
+      snackbarMessage.value = "Por favor, ingrese el nombre del supervisor.";
+      snackbar.value = true;
+      return false;
+    }
+
+    if (!fecha.value) {
+      snackbarMessage.value = "Por favor, seleccione una fecha.";
+      snackbar.value = true;
+      return false;
+    }
+
+    if (!subseleccionado.value) {
+      console.log("Valor de subseleccionado:", subseleccionado.value);
+      snackbarMessage.value = "Por favor, seleccione una subdivisión.";
+      snackbar.value = true;
+      return false;
+    }
+    if (!pkInicio.value) {
+      snackbarMessage.value = "Por favor, ingrese un Pk Inicio.";
+      snackbar.value = true;
+      return false;
+    }
+    if (!pkTermino.value) {
+      snackbarMessage.value = "Por favor, ingrese un Pk Termino.";
+      snackbar.value = true;
+      return false;
+    }
+    if (!observacionGeneral.value) {
+      snackbarMessage.value = "Por favor, ingrese una observación.";
+      snackbar.value = true;
+      return false;
+    }
+
+    return true;
+  }
+
   const saveData = async (cerrado) => {
+    if (cerrado === 1 && !validateForm()) {
+      return;
+    }
     const dataToSave = {
       parentItems: parentItems.value,
       cerrado: cerrado,
