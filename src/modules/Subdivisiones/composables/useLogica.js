@@ -6,7 +6,10 @@ export const useLogica = (
   abrirDialogEliminar,
   createItem,
   editItem,
-  deleteItemApi
+  deleteItemApi,
+  snackbar,
+  snackbarColor,
+  snackbarMessage
 ) => {
   const itemEditar = ref({
     nombre: "",
@@ -26,8 +29,40 @@ export const useLogica = (
     });
   };
 
+  function validateForm(nombre, pk_inicio, pk_termino) {
+    if (!nombre) {
+      snackbarMessage.value = "Por favor, ingrese un nombre.";
+      snackbarColor.value = "info";
+      snackbar.value = true;
+      return false;
+    }
+
+    if (!pk_inicio || isNaN(pk_inicio) || pk_inicio <= 0) {
+      snackbarMessage.value =
+        "PK Inicio debe ser un número positivo y es requerido.";
+      snackbarColor.value = "info";
+      snackbar.value = true;
+      return false;
+    }
+
+    if (!pk_termino || isNaN(pk_termino) || pk_termino <= 0) {
+      snackbarMessage.value =
+        "PK Término debe ser un número positivo y es requerido.";
+      snackbarColor.value = "info";
+      snackbar.value = true;
+      return false;
+    }
+
+    return true;
+  }
+
   const guardar = async () => {
-    const { pk_subdivision_id, nombre, pk_inicio, pk_termino } = itemEditar.value;
+    const { pk_subdivision_id, nombre, pk_inicio, pk_termino } =
+      itemEditar.value;
+
+    if (!validateForm(nombre, pk_inicio, pk_termino)) {
+      return;
+    }
 
     if (servicioExiste(nombre, pk_subdivision_id)) {
       alert("Este Servicio ya existe!");

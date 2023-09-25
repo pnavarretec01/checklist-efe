@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, isRef } from 'vue';
-const emit = defineEmits();
+const emit = defineEmits(['close', 'guardarItem']);
 
 const props = defineProps({
   item: {
@@ -12,7 +12,11 @@ const props = defineProps({
     required: true
   },
 });
+
 const localDialog = ref(props.dialog);
+const snackbar = ref(false);
+const snackbarColor = ref('error');
+const snackbarMessage = ref('');
 
 watch(() => props.dialog, newVal => {
   localDialog.value = newVal;
@@ -28,8 +32,24 @@ const close = () => {
   emit('close');
 };
 
+const nombreRef = ref(null);
+const pkInicioRef = ref(null);
+const pkTerminoRef = ref(null);
+
+const validateItem = () => {
+  if (!nombreRef.value.validate() || !pkInicioRef.value.validate() || !pkTerminoRef.value.validate()) {
+    snackbarMessage.value = "Por favor, corrija los errores antes de guardar.";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+    return false;
+  }
+  return true;
+};
+
 const guardar = () => {
-  emit('guardarItem', props.item);
+  if (validateItem()) {
+    emit('guardarItem', props.item);
+  }
 };
 </script>
 
@@ -41,13 +61,16 @@ const guardar = () => {
       <VCardText>
         <VRow>
           <VCol cols="12" sm="12" md="12">
-            <VTextField v-model="item.nombre" label="Nombre" />
+            <VTextField ref="nombreRef" v-model="item.nombre" label="Nombre"
+              :rules="[v => !!v || 'El nombre es requerido']" />
           </VCol>
           <VCol cols="12" sm="6" md="6">
-            <VTextField v-model="item.pk_inicio" label="PK Inicio" />
+            <VTextField ref="pkInicioRef" v-model="item.pk_inicio" label="PK Inicio" type="number"
+              :rules="[v => !!v || 'PK Inicio es requerido', v => v > 0 || 'PK Inicio debe ser un número positivo']" />
           </VCol>
           <VCol cols="12" sm="6" md="6">
-            <VTextField v-model="item.pk_termino" label="PK Término" />
+            <VTextField ref="pkTerminoRef" v-model="item.pk_termino" label="PK Término" type="number"
+              :rules="[v => !!v || 'PK Término es requerido', v => v > 0 || 'PK Término debe ser un número positivo']" />
           </VCol>
         </VRow>
       </VCardText>
@@ -58,5 +81,9 @@ const guardar = () => {
         <VBtn color="success" variant="elevated" @click="guardar">Guardar</VBtn>
       </VCardActions>
     </VCard>
+
+    <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
+      {{ snackbarMessage }}
+    </VSnackbar>
   </VDialog>
 </template>

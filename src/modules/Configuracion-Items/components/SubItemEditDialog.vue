@@ -16,6 +16,12 @@ const localItem = ref(JSON.parse(JSON.stringify(props.item)));
 
 const editar = ref({});
 const subItemsBackup = ref({});
+const snackbar = ref(false);
+const snackbarColor = ref('info');
+const snackbarMessage = ref('');
+const nombreRef = ref(null);
+const ordenRef = ref(null);
+
 
 const startEdit = (subitem, index) => {
   editar.value[index] = true;
@@ -44,8 +50,28 @@ watch(localDialog, (newVal) => {
   emit('update:dialog', newVal);
 });
 
+const validateSubItem = (nombre, orden) => {
+  if (!nombre.trim()) {
+    snackbarMessage.value = "El campo 'Nombre' es obligatorio.";
+    snackbarColor.value = "info";
+    snackbar.value = true;
+    return false;
+  }
+
+  if (!orden || isNaN(orden) || parseInt(orden) <= 0) {
+    snackbarMessage.value = "El campo 'Orden' debe ser un número entero positivo y es requerido.";
+    snackbarColor.value = "info";
+    snackbar.value = true;
+    return false;
+  }
+
+  return true;
+};
+
 const save = (subitem, index) => {
-  let data = { itemId: props.item.pk_item_id, subitem: subitem }
+  if (!validateSubItem(subitem.nombre, subitem.orden)) return;
+
+  let data = { itemId: props.item.pk_item_id, subitem: subitem };
   emit('saveSubItem', data);
 
   editar.value[index] = false;
@@ -60,11 +86,16 @@ const startAdding = () => {
 };
 
 const saveNewSubitem = () => {
-  let data = { itemId: props.item.pk_item_id, subitem: newSubItem.value }
-  emit('saveSubItem', data);
+  const isNombreValid = nombreRef.value.validate();
+  const isOrdenValid = ordenRef.value.validate();
 
-  newSubItem.value = { nombre: '', orden: '' };
-  addingMode.value = false;
+  if (isNombreValid && isOrdenValid && validateSubItem(newSubItem.value.nombre, newSubItem.value.orden)) {
+    let data = { itemId: props.item.pk_item_id, subitem: newSubItem.value };
+    emit('saveSubItem', data);
+
+    newSubItem.value = { nombre: '', orden: '' };
+    addingMode.value = false;
+  }
 };
 
 const cancelAdding = () => {
@@ -86,10 +117,11 @@ const cancelAdding = () => {
           <VBtn color="primary" @click="startAdding" v-if="!addingMode">Agregar</VBtn>
           <div v-if="addingMode">
             <VCol cols="12" sm="12" md="12">
-              <VTextField v-model="newSubItem.nombre" label="Nombre" />
+              <VTextField ref="nombreRef" v-model="newSubItem.nombre" label="Nombre" :rules="[v => !!v || 'El nombre es requerido']" />
             </VCol>
             <VCol cols="12" sm="12" md="12">
-              <VTextField v-model="newSubItem.orden" label="Orden" />
+              <VTextField ref="ordenRef" v-model="newSubItem.orden" label="Orden" type="number"
+                :rules="[v => !!v || 'El orden es requerido', v => v > 0 || 'El orden debe ser un número positivo']" />
             </VCol>
 
             <VBtn color="success" @click="saveNewSubitem">Guardar</VBtn>
@@ -108,14 +140,16 @@ const cancelAdding = () => {
                       <label>Nombre</label>
                       <p>{{ subitem.nombre }}</p>
                     </div>
-                    <VTextField v-model="subitem.nombre" label="Nombre" v-if="editar[index]" />
+                    <VTextField v-model="subitem.nombre" label="Nombre" v-if="editar[index]"
+                      :rules="[v => !!v || 'El nombre es requerido']" />
                   </VCol>
                   <VCol cols="12" sm="12" md="12">
                     <div v-if="!editar[index]">
                       <label>Orden</label>
                       <p>{{ subitem.orden }}</p>
                     </div>
-                    <VTextField v-model="subitem.orden" label="Orden" v-if="editar[index]" />
+                    <VTextField v-model="subitem.orden" label="Orden" v-if="editar[index]" type="number"
+                      :rules="[v => !!v || 'El orden es requerido', v => v > 0 || 'El orden debe ser un número positivo']" />
                   </VCol>
                   <VCol cols="12">
                     <VBtn size="small" color="success" variant="elevated" @click="startEdit(subitem, index)"
@@ -139,5 +173,9 @@ const cancelAdding = () => {
         <VBtn variant="outlined" color="success" @click="close">Cerrar</VBtn>
       </VCardActions>
     </VCard>
+    <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
+      {{ snackbarMessage }}
+    </VSnackbar>
+
   </VDialog>
 </template>

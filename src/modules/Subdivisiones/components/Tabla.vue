@@ -25,7 +25,7 @@ const {
   deleteItem,
   confirmarEliminar,
   closeDelete,
-  abrirEliminarItem
+  abrirEliminarItem,
 } = useLogica(data, abrirDialog, abrirDialogEliminar, createItem, editItem, deleteItemApi, snackbar, snackbarColor, snackbarMessage);
 
 
