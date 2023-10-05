@@ -44,7 +44,7 @@ const sincronizar = () => {
   fetchItems()
 }
 
-onMounted(fetchItems);
+onMounted(fetchItems(), manualSync());
 
 const headers = [
   { title: 'Supervisor', key: 'nombre_supervisor' },
@@ -103,6 +103,8 @@ const isClosed = (value) => {
       <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
         Crear Nuevo Checklist
       </VBtn>
+    </div>
+    <div class="me-3 d-flex gap-3 mb-4 mt-1">
       <VBtn prepend-icon="mdi-sync" @click="sincronizar">
         Sincronizar
       </VBtn>

@@ -175,7 +175,6 @@ export default function useChecklist(
     }
 
     if (!subseleccionado.value) {
-      console.log("Valor de subseleccionado:", subseleccionado.value);
       snackbarMessage.value = "Por favor, seleccione una subdivisión.";
       snackbar.value = true;
       return false;

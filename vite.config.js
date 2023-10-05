@@ -16,13 +16,17 @@ import DefineOptions from "unplugin-vue-define-options/vite";
 export default defineConfig({
   plugins: [
     VitePWA({
+      registerType: "autoUpdate",
+      workbox: {
+        cleanupOutdatedCaches: false,
+      },
       manifest: {
         name: "Checklist EFE",
         short_name: "Checklist",
         start_url: ".",
         display: "standalone",
         background_color: "#ffffff",
-        theme_color: "#000000",
+        theme_color: "#002854",
         icons: [
           {
             src: "/logo-efe2.png",
@@ -30,6 +34,7 @@ export default defineConfig({
             type: "image/png",
           },
         ],
+        registerType: "autoUpdate",
       },
     }),
     vue(),

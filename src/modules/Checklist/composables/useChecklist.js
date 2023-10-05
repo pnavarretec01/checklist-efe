@@ -121,6 +121,7 @@ export default function useChecklist(
   };
 
   const storeItemsInLocalStorage = (items) => {
+    console.log("store", items);
     localStorage.setItem("checklist_datatabla", JSON.stringify(items));
   };
 
@@ -139,6 +140,7 @@ export default function useChecklist(
           ...item,
           needsSync: false,
         }));
+        console.log(items.value);
         storeItemsInLocalStorage(items.value);
         snackbar.value = true;
         snackbarMessage.value = "Datos cargados con éxito!";
@@ -234,6 +236,7 @@ export default function useChecklist(
         "Guardado localmente. Se sincronizará cuando esté online.";
       snackbarColor.value = "warning";
     }
+    router.push({ name: "checklist-page" });
   };
 
   const syncPendingItems = async () => {
@@ -333,6 +336,7 @@ export default function useChecklist(
     if (online.value) {
       await updateCaracteristicas(cerrado);
     } else {
+      console.log(itemId.value);
       if (!itemId.value) {
         // Si no tiene un ID, es un nuevo registro que aún no ha sido subido.
         updateItemInLocalStorage({
@@ -351,7 +355,8 @@ export default function useChecklist(
         snackbarMessage.value = "Edición guardada localmente.";
         snackbarColor.value = "warning";
       } else {
-        // Tiene un ID, por lo que marcamos para ser sincronizado luego.
+        // Tiene un ID, por lo que marcamos para ser sincronizado luego
+        // dato editado local - falta actualizar tabla con este dato
         const itemToUpdate = {
           ...parentItems.value,
           pk_formulario_id: itemId.value,
@@ -370,6 +375,7 @@ export default function useChecklist(
         snackbarMessage.value =
           "Edición guardada localmente. Se sincronizará cuando esté online.";
         snackbarColor.value = "warning";
+        router.push({ name: "checklist-page" });
       }
     }
   };
