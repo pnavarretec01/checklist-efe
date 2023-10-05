@@ -18,7 +18,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       workbox: {
-        cleanupOutdatedCaches: false,
+        cleanupOutdatedCaches: true,
       },
       manifest: {
         name: "Checklist EFE",
@@ -34,7 +34,6 @@ export default defineConfig({
             type: "image/png",
           },
         ],
-        registerType: "autoUpdate",
       },
     }),
     vue(),
