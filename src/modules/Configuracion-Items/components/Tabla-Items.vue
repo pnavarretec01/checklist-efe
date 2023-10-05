@@ -254,7 +254,6 @@ async function handleApiResponse(promise) {
       throw new Error(response.data.message || "Error en la operación");
     }
   } catch (error) {
-    console.log(error);
     if (error.response && error.response.data) {
       throw new Error(error.response.data.message || "Error en la operación");
     }

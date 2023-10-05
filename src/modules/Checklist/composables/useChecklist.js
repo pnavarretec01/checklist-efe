@@ -43,16 +43,12 @@ export default function useChecklist(
         const cachedData = getFromLocalStorage("subdivisionsData");
         if (cachedData) {
           subdivisions.value = cachedData;
-          console.log(
-            "Uso de datos de subdivisiones almacenados en caché de LocalStorage debido a un error de API"
-          );
         }
       }
     } catch (err) {
       const cachedData = getFromLocalStorage("subdivisionsData");
       if (cachedData) {
         subdivisions.value = cachedData;
-        console.log("Usando datos de subdivisiones precargadas");
       } else {
         error.value = "Error obteniendo subdivisiones: " + err.message;
       }
@@ -65,9 +61,13 @@ export default function useChecklist(
   const updateConnectionStatus = () => {
     isConnected.value = navigator.onLine;
     if (isConnected.value) {
-      alert("Conexión a Internet restaurada!");
+      snackbar.value = true;
+      snackbarMessage.value = "Conexión a Internet Restaurada";
+      snackbarColor.value = "success";
     } else {
-      alert("Sin Conexión a Internet!");
+      snackbar.value = true;
+      snackbarMessage.value = "Sin Conexión a Internet";
+      snackbarColor.value = "warning";
     }
   };
 
@@ -121,7 +121,6 @@ export default function useChecklist(
   };
 
   const storeItemsInLocalStorage = (items) => {
-    console.log("store", items);
     localStorage.setItem("checklist_datatabla", JSON.stringify(items));
   };
 
@@ -140,7 +139,6 @@ export default function useChecklist(
           ...item,
           needsSync: false,
         }));
-        console.log(items.value);
         storeItemsInLocalStorage(items.value);
         snackbar.value = true;
         snackbarMessage.value = "Datos cargados con éxito!";
@@ -311,7 +309,6 @@ export default function useChecklist(
       cerrado.value = formulario.cerrado;
 
       parentItems.value = mapStructure(formulario);
-      //console.log(parentItems.value);
     } catch (err) {
       error.value = err.message;
       console.error("Error al obtener el formulario por ID:", err);
@@ -336,7 +333,6 @@ export default function useChecklist(
     if (online.value) {
       await updateCaracteristicas(cerrado);
     } else {
-      console.log(itemId.value);
       if (!itemId.value) {
         // Si no tiene un ID, es un nuevo registro que aún no ha sido subido.
         updateItemInLocalStorage({
@@ -357,6 +353,7 @@ export default function useChecklist(
       } else {
         // Tiene un ID, por lo que marcamos para ser sincronizado luego
         // dato editado local - falta actualizar tabla con este dato
+
         const itemToUpdate = {
           ...parentItems.value,
           pk_formulario_id: itemId.value,
@@ -370,6 +367,8 @@ export default function useChecklist(
           cerrado: cerrado,
           needsSync: true,
         };
+        console.log(JSON.parse(localStorage.getItem("checklist_datatabla")));
+        console.log("item editado", itemToUpdate);
         storeEditedItemsInLocalStorage(itemToUpdate);
         snackbar.value = true;
         snackbarMessage.value =

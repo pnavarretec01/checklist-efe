@@ -25,7 +25,7 @@ export default defineConfig({
         short_name: "Checklist",
         start_url: ".",
         display: "standalone",
-        background_color: "#ffffff",
+        background_color: "#002854",
         theme_color: "#002854",
         icons: [
           {

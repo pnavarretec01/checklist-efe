@@ -19,11 +19,14 @@ export default function useChecklist(
   const updateConnectionStatus = () => {
     isConnected.value = navigator.onLine;
     if (isConnected.value) {
-      alert("Conexión a Internet restaurada!");
+      snackbar.value = true;
+      snackbarMessage.value = "Conexión a Internet Restaurada";
+      snackbarColor.value = "success";
       syncOfflineData();
     } else {
-      console.log("Sin Conexión a Internet!");
-      alert("Sin Conexión a Internet!");
+      snackbar.value = true;
+      snackbarMessage.value = "Sin Conexión a Internet";
+      snackbarColor.value = "warning";
     }
   };
 
@@ -68,16 +71,12 @@ export default function useChecklist(
         const cachedData = getFromLocalStorage("subdivisionsData");
         if (cachedData) {
           subdivisions.value = cachedData;
-          console.log(
-            "Uso de datos de subdivisiones almacenados en caché de LocalStorage debido a un error de API"
-          );
         }
       }
     } catch (err) {
       const cachedData = getFromLocalStorage("subdivisionsData");
       if (cachedData) {
         subdivisions.value = cachedData;
-        console.log("Usando datos de subdivisiones precargadas");
       } else {
         error.value = "Error obteniendo subdivisiones: " + err.message;
       }
@@ -108,16 +107,12 @@ export default function useChecklist(
         const cachedData = getFromLocalStorage("checklistData");
         if (cachedData) {
           parentItems.value = cachedData;
-          console.log(
-            "Uso de datos almacenados en caché de LocalStorage debido a un error de API"
-          );
         }
       }
     } catch (err) {
       const cachedData = getFromLocalStorage("checklistData"); // obtengo los datos desde LocalStorage en caso de error
       if (cachedData) {
         parentItems.value = cachedData;
-        console.log("Usando data precargada");
       } else {
         error.value = err.message;
       }
@@ -213,7 +208,6 @@ export default function useChecklist(
   const sendCaracteristicas = async (dataToSave) => {
     try {
       if (!isConnected.value) {
-        console.log("sin conexion?");
         const dataToSaveLocal = {
           formulario: {
             nombre_supervisor: nombreSupervisor.value,
@@ -277,7 +271,6 @@ export default function useChecklist(
             }
           }
         }
-        console.log("paso a pushear a tabla");
 
         const storedChecklistData =
           getFromLocalStorage("checklist_datatabla") || [];

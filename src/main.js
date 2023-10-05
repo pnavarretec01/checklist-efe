@@ -8,7 +8,6 @@ import router from "@/router";
 import "@core/scss/template/index.scss";
 import "@styles/styles.scss";
 import { createPinia } from "pinia";
-import { registerSW } from 'virtual:pwa-register';
 import { createApp } from "vue";
 
 
@@ -25,5 +24,3 @@ app.use(layoutsPlugin);
 
 // Mount vue app
 app.mount("#app");
-
-registerSW({ immediate: true })
