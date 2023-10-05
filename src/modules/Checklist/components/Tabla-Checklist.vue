@@ -142,10 +142,10 @@ const isClosed = (value) => {
             </VList>
           </VMenu>
         </VBtn>
-        <VIcon v-if="item.value.needsSync" small class="me-2">mdi-sync-alert</VIcon>
-        <VIcon v-else small class="me-2">mdi-check</VIcon>
         <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
         <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
+        <VIcon v-if="item.value.needsSync" small class="me-2">mdi-sync-alert</VIcon>
+        <VIcon v-else small class="me-2">mdi-check</VIcon>
       </template>
       <template v-slot:item.subdivision="{ item }">
         {{ item.value.subdivision.nombre }}
