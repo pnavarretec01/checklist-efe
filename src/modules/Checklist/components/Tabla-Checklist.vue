@@ -103,6 +103,9 @@ const isClosed = (value) => {
       <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
         Crear Nuevo Checklist
       </VBtn>
+      <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
+        act
+      </VBtn>
     </div>
     <div class="me-3 d-flex gap-3 mb-4 mt-1">
       <VBtn prepend-icon="mdi-sync" @click="sincronizar">
