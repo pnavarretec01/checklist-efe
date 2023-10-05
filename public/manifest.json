@@ -3,7 +3,7 @@
     "short_name": "Checklist",
     "description": "Checklist Infraestructura",
     "start_url": ".",
-    "display": "standalone",
+    "display": "minimal-ui",
     "background_color": "#002854",
     "theme_color": "#002854",
     "icons": [
