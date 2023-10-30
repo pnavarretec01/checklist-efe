@@ -121,7 +121,6 @@ const isClosed = (value) => {
 
     <VDataTable :headers="headers" :items="items" :loading="loading" :items-per-page="options.itemsPerPage"
       :page="options.page" :search="search" @update:options="options = $event">
-
       <template v-slot:item.actions="{ item }">
         <VBtn icon variant="text" size="small" color="medium-emphasis">
           <VIcon size="24" icon="tabler-dots-vertical" />
@@ -144,7 +143,7 @@ const isClosed = (value) => {
         </VBtn>
         <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
         <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
-        <VIcon v-if="item.value.needsSync" small class="me-2">mdi-sync-alert</VIcon>
+        <VIcon v-if="item.value.needsSync" small class="me-2">mdi-sync</VIcon>
         <VIcon v-else small class="me-2">mdi-check</VIcon>
       </template>
       <template v-slot:item.subdivision="{ item }">

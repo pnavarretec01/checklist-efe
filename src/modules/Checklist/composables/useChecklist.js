@@ -132,7 +132,7 @@ export default function useChecklist(
     if (online.value) {
       await syncPendingItems();
       await syncEditedItems();
-      await syncDeletedItems();
+      //await syncDeletedItems();
       try {
         const response = await axios.get(apiURL + "formularios");
         items.value = response.data.map((item) => ({
@@ -326,6 +326,29 @@ export default function useChecklist(
     storeItemsInLocalStorage(localItems);
   };
 
+  const updateItemInDataTableLocalStorage = (updatedItem) => {
+    console.log("updatedItem", updatedItem);
+    let items = getFromLocalStorage("checklist_datatabla") || [];
+
+    // Encuentra el índice del ítem basado en el ID (si existe)
+    const index = items.findIndex(
+      (item) => {
+        console.log(item);
+        return item.pk_formulario_id === updatedItem.pk_formulario_id}
+    );
+
+    if (index !== -1) {
+      // Si el ítem existe, reemplaza el ítem viejo con el nuevo
+      items[index] = updatedItem;
+      console.log(items[index]);
+    } else {
+      // Si el ítem no existe, añade el nuevo ítem a la lista
+      items.push(updatedItem);
+    }
+
+    saveToLocalStorage("checklist_datatabla", items);
+  };
+
   const updateData = async (cerrado) => {
     if (cerrado === 1 && !validateForm()) {
       return;
@@ -346,6 +369,19 @@ export default function useChecklist(
           subdivision: subseleccionado.value.pk_subdivision_id,
           cerrado: cerrado,
           needsSync: true,
+          items: parentItems.value.map((item) => ({
+            pk_item_id: item.id,
+            nombre: item.nombre,
+            subitems: item.items.map((subitem) => ({
+              pk_subitem_id: subitem.id,
+              nombre: subitem.nombre,
+              data: subitem.data.map((data) => ({
+                pk: data.pk,
+                collera: data.collera,
+                observacion: data.observacion,
+              })),
+            })),
+          })),
         });
         snackbar.value = true;
         snackbarMessage.value = "Edición guardada localmente.";
@@ -356,7 +392,7 @@ export default function useChecklist(
 
         const itemToUpdate = {
           ...parentItems.value,
-          pk_formulario_id: itemId.value,
+          pk_formulario_id: Number(itemId.value),
           nombre_supervisor: nombreSupervisor.value,
           fecha: fecha.value,
           subdivision: subdivision.value,
@@ -366,9 +402,47 @@ export default function useChecklist(
           subdivision: subseleccionado.value.pk_subdivision_id,
           cerrado: cerrado,
           needsSync: true,
+          items: parentItems.value.map((item) => ({
+            pk_item_id: item.id,
+            nombre: item.nombre,
+            subitems: item.items.map((subitem) => ({
+              pk_subitem_id: subitem.id,
+              nombre: subitem.nombre,
+              data: subitem.data.map((data) => ({
+                pk: data.pk,
+                collera: data.collera,
+                observacion: data.observacion,
+              })),
+            })),
+          })),
         };
-        console.log(JSON.parse(localStorage.getItem("checklist_datatabla")));
-        console.log("item editado", itemToUpdate);
+        const itemToUpdateTablaOffline = {
+          ...parentItems.value,
+          pk_formulario_id: Number(itemId.value),
+          nombre_supervisor: nombreSupervisor.value,
+          fecha: fecha.value,
+          subdivision: subdivision.value,
+          pk_inicio: pkInicio.value,
+          pk_termino: pkTermino.value,
+          observacion_general: observacionGeneral.value,
+          subdivision: subseleccionado.value,
+          cerrado: cerrado,
+          needsSync: true,
+          items: parentItems.value.map((item) => ({
+            pk_item_id: item.id,
+            nombre: item.nombre,
+            subitems: item.items.map((subitem) => ({
+              pk_subitem_id: subitem.id,
+              nombre: subitem.nombre,
+              data: subitem.data.map((data) => ({
+                pk: data.pk,
+                collera: data.collera,
+                observacion: data.observacion,
+              })),
+            })),
+          })),
+        };
+        updateItemInDataTableLocalStorage(itemToUpdateTablaOffline);
         storeEditedItemsInLocalStorage(itemToUpdate);
         snackbar.value = true;
         snackbarMessage.value =
