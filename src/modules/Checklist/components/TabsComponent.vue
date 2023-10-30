@@ -95,7 +95,7 @@ watch(() => props.parentItems, (newItems) => {
                 <VTextField v-model.number="dataSubitem.pk" type="number" label="PK" />
               </VCol>
               <VCol cols="6" md="3">
-                <VTextField v-model="dataSubitem.collera" type="number" label="Collera" />
+                <VTextField v-model="dataSubitem.collera" label="Collera" />
               </VCol>
               <VCol cols="12" md="5" v-if="dataSubitem.pk && dataSubitem.collera">
                 <VTextarea v-model="dataSubitem.observacion" rows="2" label="Observación" placeholder="Observación" />

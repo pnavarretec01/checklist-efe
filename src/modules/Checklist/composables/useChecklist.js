@@ -55,7 +55,7 @@ export default function useChecklist(
     }
   };
 
-  // Este es un watcher para detectar cambios en el estado de conexión.
+  //watcher para detectar cambios en el estado de conexion
   window.addEventListener("online", () => (online.value = true));
   window.addEventListener("offline", () => (online.value = false));
   const updateConnectionStatus = () => {
@@ -64,6 +64,8 @@ export default function useChecklist(
       snackbar.value = true;
       snackbarMessage.value = "Conexión a Internet Restaurada";
       snackbarColor.value = "success";
+      fetchItems();
+      fetchSubdivisions();
     } else {
       snackbar.value = true;
       snackbarMessage.value = "Sin Conexión a Internet";
@@ -91,7 +93,7 @@ export default function useChecklist(
     return data ? JSON.parse(data) : null;
   }
 
-  // Mapea la estructura de los datos provenientes del API.
+  // Mapea la estructura de los datos provenientes de la API
   const mapStructure = (apiData) => {
     return apiData.items.map((item) => ({
       id: item.pk_item_id,
@@ -106,7 +108,7 @@ export default function useChecklist(
     }));
   };
 
-  // Obtiene la estructura de items del API.
+  // Obtiene la estructura de items de la API
   const fetchStructure = async () => {
     try {
       const response = await axios.get(apiURL + "items");
@@ -222,11 +224,11 @@ export default function useChecklist(
         cerrado: cerrado,
       });
     } else {
-      // Si estás offline, guardar el ítem en localStorage.
+      // si esta offline, guardar el ítem en localStorage
       const pendingItems = getItemsFromLocalStorage();
       pendingItems.push({
         ...dataToSend,
-        needsSync: true, // Marcar el ítem como pendiente de sincronización.
+        needsSync: true, //marca el item como pendiente de sincronización
       });
       storeItemsInLocalStorage(pendingItems);
       snackbar.value = true;
@@ -245,16 +247,16 @@ export default function useChecklist(
     for (const item of pendingItems) {
       try {
         await axios.post(apiURL + "formularios/", item);
-        // Si se sincroniza con éxito, elimina la marca de sincronización pendiente.
+        // Si se sincroniza con éxito, elimina la marca de sincronización pendiente
         item.needsSync = false;
       } catch (err) {
         console.error("Error al sincronizar:", err);
       }
     }
-    storeItemsInLocalStorage(pendingItems); // Actualizar localStorage.
+    storeItemsInLocalStorage(pendingItems); // Actualizar localStorage
   };
 
-  // Envía las características al API.
+  // Envía las características a la API
   const sendCaracteristicas = async (dataToSave) => {
     const dataToSend = {
       formulario: {
@@ -317,7 +319,7 @@ export default function useChecklist(
 
   const updateItemInLocalStorage = (item) => {
     const localItems = getItemsFromLocalStorage();
-    const index = localItems.findIndex((localItem) => localItem.id === item.id);
+    const index = localItems.findIndex((localItem) => localItem.id == item.id);
     if (index !== -1) {
       localItems[index] = item;
     } else {
@@ -327,133 +329,117 @@ export default function useChecklist(
   };
 
   const updateItemInDataTableLocalStorage = (updatedItem) => {
-    console.log("updatedItem", updatedItem);
     let items = getFromLocalStorage("checklist_datatabla") || [];
 
-    // Encuentra el índice del ítem basado en el ID (si existe)
-    const index = items.findIndex(
-      (item) => {
-        console.log(item);
-        return item.pk_formulario_id === updatedItem.pk_formulario_id}
-    );
+    // encuentra el índice del ítem basado en el ID (si es que existe)
+    const index = items.findIndex((item) => {
+      return item.pk_formulario_id === updatedItem.pk_formulario_id;
+    });
 
     if (index !== -1) {
-      // Si el ítem existe, reemplaza el ítem viejo con el nuevo
+      // si el item existe, reemplaza el item viejo con el nuevo
       items[index] = updatedItem;
-      console.log(items[index]);
     } else {
-      // Si el ítem no existe, añade el nuevo ítem a la lista
+      // si el item no existe, añade el nuevo item a la lista
       items.push(updatedItem);
     }
 
     saveToLocalStorage("checklist_datatabla", items);
   };
 
+  const storeFormDataToSaveInLocalStorage = (item) => {
+    let formDataToSave = getFormDataToSaveFromLocalStorage();
+    const index = formDataToSave.findIndex(
+      (fItem) => fItem.pk_formulario_id === item.pk_formulario_id
+    );
+    if (index !== -1) {
+      formDataToSave[index] = item;
+    } else {
+      formDataToSave.push(item);
+    }
+    localStorage.setItem("formDataToSave", JSON.stringify(formDataToSave));
+  };
+
+  const getFormDataToSaveFromLocalStorage = () => {
+    return JSON.parse(localStorage.getItem("formDataToSave") || "[]");
+  };
+
   const updateData = async (cerrado) => {
     if (cerrado === 1 && !validateForm()) {
       return;
     }
+
+    const baseData = {
+      ...parentItems.value,
+      nombre_supervisor: nombreSupervisor.value,
+      fecha: fecha.value,
+      subdivision: subdivision.value,
+      pk_inicio: pkInicio.value,
+      pk_termino: pkTermino.value,
+      observacion_general: observacionGeneral.value,
+      cerrado: cerrado,
+      needsSync: true,
+      items: parentItems.value.map((item) => ({
+        pk_item_id: item.id,
+        nombre: item.nombre,
+        subitems: item.items.map((subitem) => ({
+          pk_subitem_id: subitem.id,
+          nombre: subitem.nombre,
+          data: subitem.data.map((data) => ({
+            pk: data.pk,
+            collera: data.collera,
+            observacion: data.observacion,
+          })),
+        })),
+      })),
+    };
+
+    let itemToUpdate, itemToUpdateTablaOffline;
+    if (itemId.value.includes("a")) {
+      itemToUpdate = {
+        ...baseData,
+        pk_formulario_id: itemId.value,
+        subdivision: subseleccionado.value.pk_subdivision_id,
+      };
+      itemToUpdateTablaOffline = {
+        ...baseData,
+        pk_formulario_id: itemId.value,
+        subdivision: subseleccionado.value,
+      };
+      snackbar.value = true;
+      snackbarMessage.value = "Edición guardada localmente.";
+      snackbarColor.value = "warning";
+      router.push({ name: "checklist-page" });
+    } else {
+      itemToUpdate = {
+        ...baseData,
+        pk_formulario_id: Number(itemId.value),
+        subdivision: subseleccionado.value.pk_subdivision_id,
+      };
+      itemToUpdateTablaOffline = {
+        ...baseData,
+        pk_formulario_id: Number(itemId.value),
+        subdivision: subseleccionado.value,
+      };
+      snackbar.value = true;
+      snackbarMessage.value =
+        "Edición guardada localmente. Se sincronizará cuando esté online.";
+      snackbarColor.value = "warning";
+      router.push({ name: "checklist-page" });
+    }
+
     if (online.value) {
       await updateCaracteristicas(cerrado);
     } else {
-      if (!itemId.value) {
-        // Si no tiene un ID, es un nuevo registro que aún no ha sido subido.
-        updateItemInLocalStorage({
-          ...parentItems.value,
-          nombre_supervisor: nombreSupervisor.value,
-          fecha: fecha.value,
-          subdivision: subdivision.value,
-          pk_inicio: pkInicio.value,
-          pk_termino: pkTermino.value,
-          observacion_general: observacionGeneral.value,
-          subdivision: subseleccionado.value.pk_subdivision_id,
-          cerrado: cerrado,
-          needsSync: true,
-          items: parentItems.value.map((item) => ({
-            pk_item_id: item.id,
-            nombre: item.nombre,
-            subitems: item.items.map((subitem) => ({
-              pk_subitem_id: subitem.id,
-              nombre: subitem.nombre,
-              data: subitem.data.map((data) => ({
-                pk: data.pk,
-                collera: data.collera,
-                observacion: data.observacion,
-              })),
-            })),
-          })),
-        });
-        snackbar.value = true;
-        snackbarMessage.value = "Edición guardada localmente.";
-        snackbarColor.value = "warning";
-      } else {
-        // Tiene un ID, por lo que marcamos para ser sincronizado luego
-        // dato editado local - falta actualizar tabla con este dato
-
-        const itemToUpdate = {
-          ...parentItems.value,
-          pk_formulario_id: Number(itemId.value),
-          nombre_supervisor: nombreSupervisor.value,
-          fecha: fecha.value,
-          subdivision: subdivision.value,
-          pk_inicio: pkInicio.value,
-          pk_termino: pkTermino.value,
-          observacion_general: observacionGeneral.value,
-          subdivision: subseleccionado.value.pk_subdivision_id,
-          cerrado: cerrado,
-          needsSync: true,
-          items: parentItems.value.map((item) => ({
-            pk_item_id: item.id,
-            nombre: item.nombre,
-            subitems: item.items.map((subitem) => ({
-              pk_subitem_id: subitem.id,
-              nombre: subitem.nombre,
-              data: subitem.data.map((data) => ({
-                pk: data.pk,
-                collera: data.collera,
-                observacion: data.observacion,
-              })),
-            })),
-          })),
-        };
-        const itemToUpdateTablaOffline = {
-          ...parentItems.value,
-          pk_formulario_id: Number(itemId.value),
-          nombre_supervisor: nombreSupervisor.value,
-          fecha: fecha.value,
-          subdivision: subdivision.value,
-          pk_inicio: pkInicio.value,
-          pk_termino: pkTermino.value,
-          observacion_general: observacionGeneral.value,
-          subdivision: subseleccionado.value,
-          cerrado: cerrado,
-          needsSync: true,
-          items: parentItems.value.map((item) => ({
-            pk_item_id: item.id,
-            nombre: item.nombre,
-            subitems: item.items.map((subitem) => ({
-              pk_subitem_id: subitem.id,
-              nombre: subitem.nombre,
-              data: subitem.data.map((data) => ({
-                pk: data.pk,
-                collera: data.collera,
-                observacion: data.observacion,
-              })),
-            })),
-          })),
-        };
-        updateItemInDataTableLocalStorage(itemToUpdateTablaOffline);
-        storeEditedItemsInLocalStorage(itemToUpdate);
-        snackbar.value = true;
-        snackbarMessage.value =
-          "Edición guardada localmente. Se sincronizará cuando esté online.";
-        snackbarColor.value = "warning";
-        router.push({ name: "checklist-page" });
-      }
+      updateItemInDataTableLocalStorage(itemToUpdateTablaOffline);
+      storeEditedItemsInLocalStorage(itemToUpdate);
+      snackbar.value = true;
+      snackbarColor.value = "warning";
+      router.push({ name: "checklist-page" });
     }
   };
 
-  // Actualiza las características en el API.
+  // Actualiza las características en la API
   const updateCaracteristicas = async (cerrado) => {
     const dataToSend = {
       pk_formulario_id: itemId.value,

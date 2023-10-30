@@ -86,7 +86,8 @@ watch(options, newVal => {
 });
 
 const editItem = (item) => {
-  const id = (item.value.pk_formulario_id || Math.floor(Math.random() * 9999))
+  const id = item.value.pk_formulario_id || (Math.floor(Math.random() * 9999) + "a");
+  localStorage.setItem('formularioID', id);
   localStorage.setItem('formulario', JSON.stringify(item.value));
   router.push({ name: 'checklist-id', params: { id: id } });
 }

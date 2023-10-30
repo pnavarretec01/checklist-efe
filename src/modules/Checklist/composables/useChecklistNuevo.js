@@ -208,6 +208,7 @@ export default function useChecklist(
   const sendCaracteristicas = async (dataToSave) => {
     try {
       if (!isConnected.value) {
+        const id = localStorage.getItem("formularioID");
         const dataToSaveLocal = {
           formulario: {
             nombre_supervisor: nombreSupervisor.value,
@@ -247,34 +248,42 @@ export default function useChecklist(
 
         //data para pushear a la tabla offline, cambia estructura de la que se envía
         const datatoPushTable = {
+          pk_formulario_id: (Math.floor(Math.random() * 9999) + "a"),
           nombre_supervisor: nombreSupervisor.value,
           fecha: fecha.value,
           pk_inicio: pkInicio.value,
           pk_termino: pkTermino.value,
           observacion_general: observacionGeneral.value,
-          subdivision: subseleccionado.value.pk_subdivision_id,
+          subdivision: subseleccionado.value,
           cerrado: dataToSave.cerrado,
           needsSync: true,
-
-          items: [],
+          items: parentItems.value.map((item) => {
+            return {
+              pk_item_id: item.id,
+              nombre: item.nombre,
+              subitems: item.items.map((subitem) => {
+                return {
+                  pk_subitem_id: subitem.id,
+                  nombre: subitem.nombre,
+                  fk_item_id: subitem.fk_item_id,
+                  data: subitem.data.map((data) => {
+                    return {
+                      item_id: item.id,
+                      subitem_id: subitem.id,
+                      pk: data.pk,
+                      collera: data.collera,
+                      observacion: data.observacion,
+                    };
+                  }),
+                };
+              }),
+            };
+          }),
         };
-        for (let item of parentItems.value) {
-          for (let subitem of item.items) {
-            for (let data of subitem.data) {
-              datatoPushTable.items.push({
-                pk: data.pk,
-                collera: data.collera,
-                observacion: data.observacion,
-                subitem_id: subitem.id,
-                item_id: item.id,
-              });
-            }
-          }
-        }
 
         const storedChecklistData =
           getFromLocalStorage("checklist_datatabla") || [];
-        storedChecklistData.push(datatoPushTable);
+        storedChecklistData.unshift(datatoPushTable);
         saveToLocalStorage("checklist_datatabla", storedChecklistData);
 
         router.push({ name: "checklist-page" });
