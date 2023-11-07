@@ -3,6 +3,14 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 
 export default function useExportData() {
+  const getCurrentDateString = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const day = `${date.getDate()}`.padStart(2, "0");
+    return `${year}${month}${day}`;
+  };
+
   const exportToXLSX = (data, itemId) => {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
@@ -14,10 +22,10 @@ export default function useExportData() {
     // Convertir el buffer a un blob
     const blob = new Blob([buffer], { type: "application/octet-stream" });
 
-    // Crear el elemento link para descargar el archivo
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `exported_data_${itemId}.xlsx`;
+    const dateString = getCurrentDateString();
+    link.download = `export_checklist_${itemId}_${dateString}.xlsx`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -31,7 +39,8 @@ export default function useExportData() {
       const blob = new Blob([csv], { type: "text/csv" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `exported_data_${item.pk_formulario_id}.csv`;
+      const dateString = getCurrentDateString();
+      link.download = `export_checklist_${item.pk_formulario_id}_${dateString}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -122,7 +131,27 @@ export default function useExportData() {
     return rows;
   }
 
+  const exportAllData = (allItems, format) => {
+    const dataToExport = allItems
+      .map((item) => transformDataForCSV(item))
+      .flat();
+
+    if (format === "csv") {
+      const csv = Papa.unparse(dataToExport);
+      const blob = new Blob([csv], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Checklists_todos_.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (format === "xlsx") {
+      exportToXLSX(dataToExport, `Checklists_todos_`);
+    }
+  };
+
   return {
     exportData,
+    exportAllData,
   };
 }

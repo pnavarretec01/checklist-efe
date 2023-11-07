@@ -38,35 +38,19 @@ function handleResize() {
   isMobile.value = window.innerWidth <= 768;
 }
 
-watch(() => props.parentItems, (newItems) => {
-  setTimeout(() => {
-    newItems.forEach(item => {
-      item.items.forEach(subitem => {
-        subitem.data.forEach(dataSubitem => {
-          let minPK, maxPK;
-          // subdivision editar o nueva
-          if (props.pkInicio && props.pkTermino) {
-            minPK = props.pkInicio;
-            maxPK = props.pkTermino;
-          } else if (item.subdivision) {
-            minPK = item.subdivision.pk_inicio;
-            maxPK = item.subdivision.pk_termino;
-          }
-          // validacion
-          if (minPK && dataSubitem.pk < minPK) {
-            dataSubitem.pk = minPK;
-            snackbarMessage.value = `El PK mínimo permitido es ${minPK}`;
-            snackbar.value = true;
-          } else if (maxPK && dataSubitem.pk > maxPK) {
-            dataSubitem.pk = maxPK;
-            snackbarMessage.value = `El PK máximo permitido es ${maxPK}`;
-            snackbar.value = true;
-          }
-        });
-      });
-    });
-  }, 1000);
-}, { deep: true });
+const validatePK = (pk, minPK, maxPK) => {
+  if (minPK !== undefined && pk < minPK) {
+    snackbarMessage.value = `El PK mínimo permitido es ${minPK}`;
+    snackbar.value = true;
+    return minPK;
+  } else if (maxPK !== undefined && pk > maxPK) {
+    snackbarMessage.value = `El PK máximo permitido es ${maxPK}`;
+    snackbar.value = true;
+    return maxPK;
+  }
+  return pk;
+}
+
 </script>
 <template>
   <VCard>
@@ -92,7 +76,8 @@ watch(() => props.parentItems, (newItems) => {
             <h3>{{ subitem.nombre }}</h3>
             <VRow v-for="(dataSubitem, dataIndex) in subitem.data" :key="dataIndex" align="center" class="mb-2">
               <VCol cols="6" md="3">
-                <VTextField v-model.number="dataSubitem.pk" type="number" label="PK" />
+                <VTextField v-model.number="dataSubitem.pk" type="number" label="PK"
+                  @blur="dataSubitem.pk = validatePK(dataSubitem.pk, props.pkInicio, props.pkTermino)" />
               </VCol>
               <VCol cols="6" md="3">
                 <VTextField v-model="dataSubitem.collera" label="Collera" />

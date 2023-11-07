@@ -279,9 +279,9 @@ async function handleApiResponse(promise) {
     <VDataTable :headers="headers" :items="items" :loading="loading" :items-per-page="options.itemsPerPage"
       :page="options.page" :search="search" @update:options="options = $event">
       <template v-slot:item.actions="{ item }">
-        <VIcon small @click="abrirSubitem(item)">mdi-plus-box-multiple</VIcon>
-        <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
-        <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
+        <VIcon small @click="abrirSubitem(item)" color="success">mdi-plus-box-multiple</VIcon>
+        <VIcon small @click="editItem(item)" color="primary">mdi-pencil</VIcon>
+        <VIcon small @click="prepareDeleteItem(item)" color="error">mdi-delete</VIcon>
       </template>
       <template v-slot:no-data>
         No hay datos disponibles.

@@ -218,25 +218,31 @@ export default function useChecklist(
     if (cerrado === 1 && !validateForm()) {
       return;
     }
-    if (online.value) {
-      await sendCaracteristicas({
-        parentItems: parentItems.value,
-        cerrado: cerrado,
-      });
-    } else {
-      // si esta offline, guardar el ítem en localStorage
-      const pendingItems = getItemsFromLocalStorage();
-      pendingItems.push({
-        ...dataToSend,
-        needsSync: true, //marca el item como pendiente de sincronización
-      });
-      storeItemsInLocalStorage(pendingItems);
-      snackbar.value = true;
-      snackbarMessage.value =
-        "Guardado localmente. Se sincronizará cuando esté online.";
-      snackbarColor.value = "warning";
+    loading.value = true;
+    try {
+      if (online.value) {
+        await sendCaracteristicas({
+          parentItems: parentItems.value,
+          cerrado: cerrado,
+        });
+      } else {
+        // si esta offline, guardar el ítem en localStorage
+        const pendingItems = getItemsFromLocalStorage();
+        pendingItems.push({
+          ...dataToSend,
+          needsSync: true, //marca el item como pendiente de sincronización
+        });
+        storeItemsInLocalStorage(pendingItems);
+        snackbar.value = true;
+        snackbarMessage.value =
+          "Guardado localmente. Se sincronizará cuando esté online.";
+        snackbarColor.value = "warning";
+        router.push({ name: "checklist-page" });
+      }
+    } catch (error) {
+    } finally {
+      loading.value = false;
     }
-    router.push({ name: "checklist-page" });
   };
 
   const syncPendingItems = async () => {
@@ -250,7 +256,10 @@ export default function useChecklist(
         // Si se sincroniza con éxito, elimina la marca de sincronización pendiente
         item.needsSync = false;
       } catch (err) {
-        console.error("Error al sincronizar:", err);
+        error.value = err.message;
+        snackbar.value = true;
+        snackbarMessage.value = err.message;
+        snackbarColor.value = "error";
       }
     }
     storeItemsInLocalStorage(pendingItems); // Actualizar localStorage
@@ -293,6 +302,8 @@ export default function useChecklist(
       snackbar.value = true;
       snackbarMessage.value = err.message;
       snackbarColor.value = "error";
+    } finally {
+      loading.value = false;
     }
   };
 

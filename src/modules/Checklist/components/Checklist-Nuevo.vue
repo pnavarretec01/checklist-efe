@@ -38,7 +38,7 @@ const {
   snackbar,
   snackbarMessage,
   snackbarColor,
-  subdivisions
+  subdivisions, loading
 } = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral, subseleccionado);
 </script>
 
@@ -59,7 +59,8 @@ const {
     <div class="pt-5 pb-5 flex-grow-1">
       <VRow>
         <VCol cols="12" md="6">
-          <VTextField v-model="nombreSupervisor" rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor" />
+          <VTextField v-model="nombreSupervisor" rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor"
+            disabled />
         </VCol>
         <VCol cols="12" md="6">
           <VTextField v-model="fecha" type="datetime-local" label="Fecha" />
@@ -85,7 +86,7 @@ const {
     </div>
   </div>
   <TabsComponent v-model:current-tab="currentTab" :parent-items="parentItems" @addCaracteristica="addCaracteristica"
-    @removeEntry="removeEntry" :pk-inicio="pkInicio" :pk-termino="pkTermino"/>
+    @removeEntry="removeEntry" :pk-inicio="pkInicio" :pk-termino="pkTermino" />
   <div class="mt-2 mb-2">
     <hr>
     <VBtn color="primary" @click="() => saveData(0)">
@@ -94,6 +95,10 @@ const {
     <VBtn class="ma-sm-1" color="primary" @click="() => saveData(1)">
       Guardar y Cerrar
     </VBtn>
+    <v-overlay :model-value="loading" class="align-center justify-center">
+      <v-progress-circular color="primary" indeterminate size="64"></v-progress-circular>
+      <span class="mt-3">Guardando y cerrando el checklist, por favor espere...</span>
+    </v-overlay>
   </div>
   <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
     {{ snackbarMessage }}

@@ -45,7 +45,7 @@ const {
   snackbarMessage,
   snackbarColor,
   cerrado,
-  subdivisions
+  subdivisions, loading
 } = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral, itemId, props.formulario, subseleccionado);
 
 onMounted(() => {
@@ -69,7 +69,7 @@ onMounted(() => {
       <VRow>
         <VCol cols="12" md="6">
           <VTextField v-model="nombreSupervisor" rows="2" label="Nombre Supervisor" placeholder="Nombre Supervisor"
-            :readonly="cerrado" />
+            disabled />
         </VCol>
         <VCol cols="12" md="6">
           <VTextField v-model="fecha" type="date" label="Fecha" :readonly="cerrado" />
@@ -98,14 +98,20 @@ onMounted(() => {
     @removeEntry="removeEntry" />
   <div class="mt-2 mb-2">
     <hr>
-    <VBtn v-if="!cerrado" class="ma-sm-1" color="primary" @click="updateData(0)">
+    <VBtn :disabled="loading" v-if="!cerrado" class="ma-sm-1" color="primary" @click="updateData(0)">
       Guardar
     </VBtn>
 
-    <VBtn v-if="!cerrado" class="ma-sm-1" color="primary" @click="updateData(1)">
+    <VBtn :disabled="loading" v-if="!cerrado" class="ma-sm-1" color="primary" @click="updateData(1)">
       Guardar y Cerrar
     </VBtn>
+
+    <v-overlay :model-value="loading" class="align-center justify-center">
+      <v-progress-circular color="primary" indeterminate size="64"></v-progress-circular>
+      <span class="mt-3">Se está procesando el Checklist, por favor espere...</span>
+    </v-overlay>
   </div>
+
   <VSnackbar v-model="snackbar" :color="snackbarColor" location="top end" :timeout="2000">
     {{ snackbarMessage }}
   </VSnackbar>

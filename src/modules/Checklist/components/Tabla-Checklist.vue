@@ -21,7 +21,10 @@ const closeDialog = () => {
   showDialog.value = false;
 };
 
-const { exportData } = useExportData();
+const { exportData, exportAllData } = useExportData();
+const downloadAllItems = () => {
+  exportAllData(items.value, 'xlsx'); // O 'csv' si prefieres ese formato
+};
 
 const {
   items,
@@ -103,16 +106,26 @@ const isClosed = (value) => {
 
 <template>
   <div>
-    <div class="me-3 d-flex gap-3 mb-4 mt-1">
-      <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
-        Crear Nuevo Checklist
-      </VBtn>
+    <div class="mb-4 mt-1">
+      <div class="mb-3">
+        <VBtn prepend-icon="tabler-plus" :to="{ name: 'checklist' }">
+          Crear Nuevo Checklist
+        </VBtn>
+      </div>
+      <div class="d-flex flex-column flex-md-row gap-3">
+        <div>
+          <VBtn prepend-icon="mdi-sync" @click="sincronizar">
+            Sincronizar
+          </VBtn>
+        </div>
+        <div>
+          <VBtn prepend-icon="mdi-file-export" @click="downloadAllItems">
+            Descargar Todo
+          </VBtn>
+        </div>
+      </div>
     </div>
-    <div class="me-3 d-flex gap-3 mb-4 mt-1">
-      <VBtn prepend-icon="mdi-sync" @click="sincronizar">
-        Sincronizar
-      </VBtn>
-    </div>
+
     <VRow>
       <VCol cols="12" offset-md="8" md="4">
         <AppTextField v-model="search" density="compact" placeholder="Buscar" append-inner-icon="tabler-search"
@@ -123,7 +136,7 @@ const isClosed = (value) => {
     <VDataTable :headers="headers" :items="items" :loading="loading" :items-per-page="options.itemsPerPage"
       :page="options.page" :search="search" @update:options="options = $event">
       <template v-slot:item.actions="{ item }">
-        <VBtn icon variant="text" size="small" color="medium-emphasis">
+        <VBtn icon variant="text" size="small" color="primary">
           <VIcon size="24" icon="tabler-dots-vertical" />
           <VMenu activator="parent">
             <VList>
@@ -142,10 +155,10 @@ const isClosed = (value) => {
             </VList>
           </VMenu>
         </VBtn>
-        <VIcon small @click="editItem(item)">mdi-pencil</VIcon>
-        <VIcon small @click="prepareDeleteItem(item)">mdi-delete</VIcon>
-        <VIcon v-if="item.value.needsSync" small class="me-2">mdi-sync</VIcon>
-        <VIcon v-else small class="me-2">mdi-check</VIcon>
+        <VIcon small @click="editItem(item)" color="primary">mdi-pencil</VIcon>
+        <VIcon small @click="prepareDeleteItem(item)" color="error">mdi-delete</VIcon>
+        <VIcon v-if="item.value.needsSync" small class="me-2" prepend-icon="">mdi-sync-off</VIcon>
+        <VIcon v-else small class="me-2" color="success">mdi-check</VIcon>
       </template>
       <template v-slot:item.subdivision="{ item }">
         {{ item.value.subdivision.nombre }}

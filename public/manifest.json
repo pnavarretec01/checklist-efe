@@ -1,7 +1,7 @@
 {
     "name": "Checklist EFE",
     "short_name": "Checklist",
-    "description": "Checklist Infraestructura",
+    "description": "Checklist EFE",
     "start_url": ".",
     "display": "minimal-ui",
     "background_color": "#002854",

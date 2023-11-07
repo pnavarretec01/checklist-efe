@@ -66,11 +66,11 @@ const guardar = () => {
           </VCol>
           <VCol cols="12" sm="6" md="6">
             <VTextField ref="pkInicioRef" v-model="item.pk_inicio" label="PK Inicio" type="number"
-              :rules="[v => !!v || 'PK Inicio es requerido', v => v > 0 || 'PK Inicio debe ser un número positivo']" />
+              :rules="[v => !!v || 'PK Inicio es requerido', v => v >= 0 || 'PK Inicio debe ser un número positivo']" />
           </VCol>
           <VCol cols="12" sm="6" md="6">
             <VTextField ref="pkTerminoRef" v-model="item.pk_termino" label="PK Término" type="number"
-              :rules="[v => !!v || 'PK Término es requerido', v => v > 0 || 'PK Término debe ser un número positivo']" />
+              :rules="[v => !!v || 'PK Término es requerido', v => v >= 0 || 'PK Término debe ser un número positivo']" />
           </VCol>
         </VRow>
       </VCardText>

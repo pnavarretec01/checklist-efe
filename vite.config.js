@@ -16,9 +16,11 @@ import DefineOptions from "unplugin-vue-define-options/vite";
 export default defineConfig({
   plugins: [
     VitePWA({
+      includeAssets: ["favicon.svg", "robots.txt", "apple-touch-icon.png"],
       registerType: "autoUpdate",
       workbox: {
         cleanupOutdatedCaches: true,
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg}"],
       },
       manifest: {
         name: "Checklist EFE",

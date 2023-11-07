@@ -15,6 +15,7 @@ export default function useChecklist(
 ) {
   const isConnected = ref(navigator.onLine);
   const isSavedOffline = ref(false);
+  const loading = ref(false);
 
   const updateConnectionStatus = () => {
     isConnected.value = navigator.onLine;
@@ -197,6 +198,7 @@ export default function useChecklist(
     if (cerrado === 1 && !validateForm()) {
       return;
     }
+    loading.value = true;
     const dataToSave = {
       parentItems: parentItems.value,
       cerrado: cerrado,
@@ -248,7 +250,7 @@ export default function useChecklist(
 
         //data para pushear a la tabla offline, cambia estructura de la que se envía
         const datatoPushTable = {
-          pk_formulario_id: (Math.floor(Math.random() * 9999) + "a"),
+          pk_formulario_id: Math.floor(Math.random() * 9999) + "a",
           nombre_supervisor: nombreSupervisor.value,
           fecha: fecha.value,
           pk_inicio: pkInicio.value,
@@ -286,7 +288,6 @@ export default function useChecklist(
         storedChecklistData.unshift(datatoPushTable);
         saveToLocalStorage("checklist_datatabla", storedChecklistData);
 
-        router.push({ name: "checklist-page" });
         return;
       }
 
@@ -324,10 +325,13 @@ export default function useChecklist(
       snackbarColor.value = "success";
       router.push({ name: "checklist-page" });
     } catch (err) {
-      error.value = err.message;
-      snackbar.value = true;
-      snackbarMessage.value = err.message;
+      snackbarMessage.value = err.response.data.message;
       snackbarColor.value = "error";
+      snackbar.value = true;
+      return;
+      throw err;
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -385,5 +389,6 @@ export default function useChecklist(
     syncOfflineData,
     manualSync,
     subdivisions,
+    loading,
   };
 }

@@ -37,17 +37,27 @@ export const useLogica = (
       return false;
     }
 
-    if (!pk_inicio || isNaN(pk_inicio) || pk_inicio <= 0) {
+    if (
+      pk_inicio === null ||
+      pk_inicio === undefined ||
+      isNaN(pk_inicio) ||
+      pk_inicio < 0
+    ) {
       snackbarMessage.value =
-        "PK Inicio debe ser un número positivo y es requerido.";
+        "PK Inicio debe ser un número no negativo y es requerido.";
       snackbarColor.value = "info";
       snackbar.value = true;
       return false;
     }
 
-    if (!pk_termino || isNaN(pk_termino) || pk_termino <= 0) {
+    if (
+      pk_termino === null ||
+      pk_termino === undefined ||
+      isNaN(pk_termino) ||
+      pk_termino < 0
+    ) {
       snackbarMessage.value =
-        "PK Término debe ser un número positivo y es requerido.";
+        "PK Término debe ser un número no negativo y es requerido.";
       snackbarColor.value = "info";
       snackbar.value = true;
       return false;

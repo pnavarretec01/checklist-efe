@@ -91,10 +91,10 @@ onMounted(fetchItems);
       @update:options="options = $event">
       <template v-slot:item.actions="{ item }">
         <IconBtn>
-          <VIcon icon="tabler-edit" @click="abrirEditarItem(item)" />
+          <VIcon icon="tabler-edit" @click="abrirEditarItem(item)" color="primary"/>
         </IconBtn>
         <IconBtn @click="abrirEliminarItem(item.value)">
-          <VIcon icon="tabler-trash" />
+          <VIcon icon="tabler-trash" color="error"/>
         </IconBtn>
       </template>
 

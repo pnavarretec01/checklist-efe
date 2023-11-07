@@ -101,7 +101,7 @@ export function useItemsApi() {
       );
       return response;
     } catch (error) {
-      throw error; // Lanza el error completo
+      throw error; 
     }
   }
 
