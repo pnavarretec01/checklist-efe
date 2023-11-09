@@ -60,6 +60,7 @@ const headers = [
   { title: 'Sub División', key: 'subdivision' },
   { title: 'Observación', key: 'observacion_general' },
   { title: 'Estado', key: 'cerrado' },
+  { title: 'Sync', key: 'needsSync' },
   { title: 'Acciones', key: 'actions' },
 ];
 
@@ -157,6 +158,10 @@ const isClosed = (value) => {
         </VBtn>
         <VIcon small @click="editItem(item)" color="primary">mdi-pencil</VIcon>
         <VIcon small @click="prepareDeleteItem(item)" color="error">mdi-delete</VIcon>
+
+      </template>
+      <template v-slot:item.needsSync="{ item }">
+
         <VIcon v-if="item.value.needsSync" small class="me-2" prepend-icon="">mdi-sync-off</VIcon>
         <VIcon v-else small class="me-2" color="success">mdi-check</VIcon>
       </template>

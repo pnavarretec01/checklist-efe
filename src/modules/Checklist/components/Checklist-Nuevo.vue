@@ -18,9 +18,7 @@ function formatDateTime(date) {
   const YYYY = date.getFullYear();
   const MM = String(date.getMonth() + 1).padStart(2, '0');
   const DD = String(date.getDate()).padStart(2, '0');
-  const HH = String(date.getHours()).padStart(2, '0');
-  const mm = String(date.getMinutes()).padStart(2, '0');
-  return `${YYYY}-${MM}-${DD}T${HH}:${mm}`;
+  return `${DD}-${MM}-${YYYY}`;
 }
 
 watch(subseleccionado, (nuevoValor, oldName) => {
@@ -51,7 +49,7 @@ const {
   </div>
   <div class="ma-sm-4">
     <div class="d-flex align-center mb-6">
-      <img :src="logoEfe" alt="logo" style="width: 12vw; max-width: 100px; min-width: 60px;">
+      <img :src="logoEfe" alt="logo" style="width: 12vw; min-width: 60px; max-width: 100px;">
       <h6 class="font-weight-bold text-xl ml-3 ml-sm-0">
         Checklist Revisión de Infraestructura Zona Norte
       </h6>
@@ -63,7 +61,7 @@ const {
             disabled />
         </VCol>
         <VCol cols="12" md="6">
-          <VTextField v-model="fecha" type="datetime-local" label="Fecha" />
+          <VTextField v-model="fecha" type="datetime" label="Fecha" />
         </VCol>
         <VCol cols="12" md="6">
           <v-autocomplete :items="subdivisions" item-title="nombre" label="Subdivisión" v-model="subseleccionado"
