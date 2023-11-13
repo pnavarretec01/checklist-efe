@@ -3,15 +3,22 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 const currentTab = ref(1);
 const emit = defineEmits();
-const props = defineProps(['parentItems', 'pkInicio', 'pkTermino']);
+const props = defineProps(['parentItems', 'pkInicio', 'pkTermino', 'subseleccionado']);
 
 const snackbar = ref(false);
 const snackbarColor = ref('error');
 const snackbarMessage = ref('');
 
-const addCaracteristica = subitem => {
+const addCaracteristica = (subitem, dataSubitem) => {
+  if (!props.subseleccionado || props.subseleccionado.length === 0) {
+    snackbarMessage.value = "Por favor, seleccione una subdivisión antes de agregar.";
+    snackbar.value = true;
+    return;
+  }
+
   emit('addCaracteristica', subitem);
-}
+};
+
 
 const removeEntry = (subitem, index) => {
   emit('removeEntry', subitem, index);
@@ -92,7 +99,7 @@ const validatePK = (pk, minPK, maxPK) => {
                 </VBtn>
               </VCol>
             </VRow>
-            <VBtn v-if="!item.cerrado" @click="addCaracteristica(subitem)">
+            <VBtn v-if="!item.cerrado" @click="addCaracteristica(subitem, dataSubitem)">
               Agregar
             </VBtn>
           </div>

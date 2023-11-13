@@ -1,10 +1,9 @@
 <script setup>
-
+import { watch } from 'vue';
 const apiUrl = import.meta.env.VITE_API_URL;
 import useChecklist from '../composables/useChecklistNuevo'
 import TabsComponent from './TabsComponent.vue'
 import logoEfe from '../../../assets/images/logo-efe.svg'
-import { watch } from 'vue';
 
 const nombreSupervisor = ref('Patricio Navarrete');
 const fecha = ref(formatDateTime(new Date()));
@@ -38,6 +37,11 @@ const {
   snackbarColor,
   subdivisions, loading
 } = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral, subseleccionado);
+
+const subseleccionadoParaTabs = computed(() => {
+ // console.log(subseleccionado.value);
+  return subseleccionado.value.length > 0 ? subseleccionado.value : null;
+});
 </script>
 
 
@@ -84,7 +88,8 @@ const {
     </div>
   </div>
   <TabsComponent v-model:current-tab="currentTab" :parent-items="parentItems" @addCaracteristica="addCaracteristica"
-    @removeEntry="removeEntry" :pk-inicio="pkInicio" :pk-termino="pkTermino" />
+    @removeEntry="removeEntry" :pk-inicio="pkInicio" :pk-termino="pkTermino"
+    :subseleccionado="subseleccionado"/>
   <div class="mt-2 mb-2">
     <hr>
     <VBtn color="primary" @click="() => saveData(0)">

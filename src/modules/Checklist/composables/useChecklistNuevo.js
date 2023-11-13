@@ -158,6 +158,7 @@ export default function useChecklist(
   };
 
   function validateForm() {
+    console.log(subseleccionado.value);
     if (!nombreSupervisor.value) {
       snackbarMessage.value = "Por favor, ingrese el nombre del supervisor.";
       snackbar.value = true;
@@ -195,7 +196,46 @@ export default function useChecklist(
   }
 
   const saveData = async (cerrado) => {
-    if (cerrado === 1 && !validateForm()) {
+    // Validaciones
+
+    if (!subseleccionado.value || subseleccionado.value.length === 0) {
+      snackbarMessage.value = "Por favor, seleccione una subdivisión.";
+      snackbar.value = true;
+      return false;
+    }
+
+    if (!nombreSupervisor.value) {
+      snackbarMessage.value = "Por favor, ingrese el nombre del supervisor.";
+      snackbar.value = true;
+      return false;
+    }
+
+    if (!fecha.value) {
+      snackbarMessage.value = "Por favor, seleccione una fecha.";
+      snackbar.value = true;
+      return false;
+    }
+
+    if (!pkInicio.value) {
+      snackbarMessage.value = "Por favor, ingrese un Pk Inicio.";
+      snackbar.value = true;
+      return false;
+    }
+
+    if (!pkTermino.value) {
+      snackbarMessage.value = "Por favor, ingrese un Pk Termino.";
+      snackbar.value = true;
+      return false;
+    }
+
+    if (!observacionGeneral.value) {
+      snackbarMessage.value = "Por favor, ingrese una observación.";
+      snackbar.value = true;
+      return false;
+    }
+
+    // Continuar con la lógica de guardado si todas las validaciones pasan
+    if (cerrado == 1) {
       return;
     }
     loading.value = true;
@@ -287,6 +327,8 @@ export default function useChecklist(
           getFromLocalStorage("checklist_datatabla") || [];
         storedChecklistData.unshift(datatoPushTable);
         saveToLocalStorage("checklist_datatabla", storedChecklistData);
+
+        router.push({ name: "checklist-page" });
 
         return;
       }
