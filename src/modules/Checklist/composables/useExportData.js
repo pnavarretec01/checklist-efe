@@ -56,9 +56,9 @@ export default function useExportData() {
 
     data.items.forEach((item) => {
       item.subitems.forEach((subitem) => {
-        if (subitem.data && subitem.data.length > 0) {
-          subitem.data.forEach((d) => {
-            rows.push({
+        subitem.data.forEach((d) => {
+          if (d.pk || d.collera || d.observacion) {
+            const row = {
               "PK Formulario ID":
                 rows.length === 0 ? data.pk_formulario_id : "",
               "Nombre Supervisor":
@@ -78,34 +78,12 @@ export default function useExportData() {
               PK: d.pk,
               Collera: d.collera,
               Observación: d.observacion,
-            });
+            };
+            rows.push(row);
             lastItemName = item.nombre;
             lastSubitemName = subitem.nombre;
-          });
-        } else {
-          rows.push({
-            "PK Formulario ID": rows.length === 0 ? data.pk_formulario_id : "",
-            "Nombre Supervisor":
-              rows.length === 0 ? data.nombre_supervisor : "",
-            Fecha: rows.length === 0 ? data.fecha : "",
-            "Subdivision ID":
-              rows.length === 0 ? data.subdivision.pk_subdivision_id : "",
-            "Subdivision Nombre":
-              rows.length === 0 ? data.subdivision.nombre : "",
-            "Observacion General":
-              rows.length === 0 ? data.observacion_general : "",
-            "PK Inicio": rows.length === 0 ? data.pk_inicio : "",
-            "PK Termino": rows.length === 0 ? data.pk_termino : "",
-            Cerrado: rows.length === 0 ? (data.cerrado ? "Sí" : "No") : "",
-            Item: item.nombre !== lastItemName ? item.nombre : "",
-            Subitem: subitem.nombre !== lastSubitemName ? subitem.nombre : "",
-            PK: "",
-            Collera: "",
-            Observación: "",
-          });
-          lastItemName = item.nombre;
-          lastSubitemName = subitem.nombre;
-        }
+          }
+        });
       });
     });
 

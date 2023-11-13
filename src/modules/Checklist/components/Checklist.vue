@@ -95,7 +95,7 @@ onMounted(() => {
     </div>
   </div>
   <TabsComponent v-model:current-tab="currentTab" :parent-items="parentItems" @addCaracteristica="addCaracteristica"
-    @removeEntry="removeEntry" />
+    @removeEntry="removeEntry" :pk-inicio="pkInicio" :pk-termino="pkTermino" :subseleccionado="subseleccionado" />
   <div class="mt-2 mb-2">
     <hr>
     <VBtn :disabled="loading" v-if="!cerrado" class="ma-sm-1" color="primary" @click="updateData(0)">

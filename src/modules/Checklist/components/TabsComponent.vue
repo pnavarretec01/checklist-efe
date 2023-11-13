@@ -87,11 +87,15 @@ const validatePK = (pk, minPK, maxPK) => {
                   @blur="dataSubitem.pk = validatePK(dataSubitem.pk, props.pkInicio, props.pkTermino)" />
               </VCol>
               <VCol cols="6" md="3">
-                <VTextField v-model="dataSubitem.collera" label="Collera" />
+                <VTextField v-model="dataSubitem.collera" label="Collera"
+                  @blur="dataSubitem.pk = validatePK(dataSubitem.pk, props.pkInicio, props.pkTermino)" />
               </VCol>
-              <VCol cols="12" md="5" v-if="dataSubitem.pk && dataSubitem.collera">
-                <VTextarea v-model="dataSubitem.observacion" rows="2" label="Observación" placeholder="Observación" />
+              <VCol cols="12" md="5"
+                v-if="dataSubitem.pk !== null && dataSubitem.pk !== undefined && dataSubitem.collera">
+                <VTextarea v-model="dataSubitem.observacion" rows="2" label="Observación" placeholder="Observación"
+                  @blur="dataSubitem.pk = validatePK(dataSubitem.pk, props.pkInicio, props.pkTermino)" />
               </VCol>
+
               <VCol cols="12" md="1">
                 <VBtn v-if="!item.cerrado" icon size="x-small" color="default" variant="text"
                   @click="() => removeEntry(subitem, dataIndex)">
