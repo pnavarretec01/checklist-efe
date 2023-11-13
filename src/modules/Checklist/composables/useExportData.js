@@ -51,63 +51,36 @@ export default function useExportData() {
 
   function transformDataForCSV(data) {
     const rows = [];
-    let lastItemName = "";
-    let lastSubitemName = "";
-
+    
     data.items.forEach((item) => {
       item.subitems.forEach((subitem) => {
         subitem.data.forEach((d) => {
           if (d.pk || d.collera || d.observacion) {
             const row = {
-              "PK Formulario ID":
-                rows.length === 0 ? data.pk_formulario_id : "",
-              "Nombre Supervisor":
-                rows.length === 0 ? data.nombre_supervisor : "",
-              Fecha: rows.length === 0 ? data.fecha : "",
-              "Subdivision ID":
-                rows.length === 0 ? data.subdivision.pk_subdivision_id : "",
-              "Subdivision Nombre":
-                rows.length === 0 ? data.subdivision.nombre : "",
-              "Observacion General":
-                rows.length === 0 ? data.observacion_general : "",
-              "PK Inicio": rows.length === 0 ? data.pk_inicio : "",
-              "PK Termino": rows.length === 0 ? data.pk_termino : "",
-              Cerrado: rows.length === 0 ? (data.cerrado ? "Sí" : "No") : "",
-              Item: item.nombre !== lastItemName ? item.nombre : "",
-              Subitem: subitem.nombre !== lastSubitemName ? subitem.nombre : "",
+              "PK Formulario ID": data.pk_formulario_id,
+              "Nombre Supervisor": data.nombre_supervisor,
+              Fecha: data.fecha,
+              "Subdivision ID": data.subdivision.pk_subdivision_id,
+              "Subdivision Nombre": data.subdivision.nombre,
+              "Observacion General": data.observacion_general,
+              "PK Inicio": data.pk_inicio,
+              "PK Termino": data.pk_termino,
+              Cerrado: data.cerrado ? "Sí" : "No",
+              Item: item.nombre,
+              Subitem: subitem.nombre,
               PK: d.pk,
               Collera: d.collera,
               Observación: d.observacion,
             };
             rows.push(row);
-            lastItemName = item.nombre;
-            lastSubitemName = subitem.nombre;
           }
         });
       });
     });
-
-    if (rows.length === 0) {
-      rows.push({
-        "PK Formulario ID": data.pk_formulario_id,
-        "Nombre Supervisor": data.nombre_supervisor,
-        Fecha: data.fecha,
-        "Subdivision ID": data.subdivision.pk_subdivision_id,
-        "Subdivision Nombre": data.subdivision.nombre,
-        "Observacion General": data.observacion_general,
-        "PK Inicio": data.pk_inicio,
-        "PK Termino": data.pk_termino,
-        Cerrado: data.cerrado ? "Sí" : "No",
-        Item: "",
-        Subitem: "",
-        PK: "",
-        Collera: "",
-        Observación: "",
-      });
-    }
-
+  
     return rows;
   }
+  
 
   const exportAllData = (allItems, format) => {
     const dataToExport = allItems
