@@ -17,7 +17,7 @@ function formatDateTime(date) {
   const YYYY = date.getFullYear();
   const MM = String(date.getMonth() + 1).padStart(2, '0');
   const DD = String(date.getDate()).padStart(2, '0');
-  return `${DD}-${MM}-${YYYY}`;
+  return `${YYYY}-${MM}-${DD}`;
 }
 
 watch(subseleccionado, (nuevoValor, oldName) => {
@@ -39,7 +39,7 @@ const {
 } = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral, subseleccionado);
 
 const subseleccionadoParaTabs = computed(() => {
- // console.log(subseleccionado.value);
+  // console.log(subseleccionado.value);
   return subseleccionado.value.length > 0 ? subseleccionado.value : null;
 });
 </script>
@@ -88,8 +88,7 @@ const subseleccionadoParaTabs = computed(() => {
     </div>
   </div>
   <TabsComponent v-model:current-tab="currentTab" :parent-items="parentItems" @addCaracteristica="addCaracteristica"
-    @removeEntry="removeEntry" :pk-inicio="pkInicio" :pk-termino="pkTermino"
-    :subseleccionado="subseleccionado"/>
+    @removeEntry="removeEntry" :pk-inicio="pkInicio" :pk-termino="pkTermino" :subseleccionado="subseleccionado" />
   <div class="mt-2 mb-2">
     <hr>
     <VBtn color="primary" @click="() => saveData(0)">

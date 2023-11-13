@@ -20,10 +20,10 @@ export default function useChecklist(
   const updateConnectionStatus = () => {
     isConnected.value = navigator.onLine;
     if (isConnected.value) {
+      syncOfflineData();
       snackbar.value = true;
       snackbarMessage.value = "Conexión a Internet Restaurada";
       snackbarColor.value = "success";
-      syncOfflineData();
     } else {
       snackbar.value = true;
       snackbarMessage.value = "Sin Conexión a Internet";
@@ -158,7 +158,6 @@ export default function useChecklist(
   };
 
   function validateForm() {
-    console.log(subseleccionado.value);
     if (!nombreSupervisor.value) {
       snackbarMessage.value = "Por favor, ingrese el nombre del supervisor.";
       snackbar.value = true;
@@ -391,6 +390,7 @@ export default function useChecklist(
           snackbar.value = true;
           snackbarMessage.value = "Datos sincronizados con éxito";
           snackbarColor.value = "success";
+          fetchItems();
         } catch (err) {
           console.error("syncOfflineData: Error al sincronizar", err);
         }
