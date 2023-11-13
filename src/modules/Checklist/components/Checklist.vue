@@ -72,7 +72,7 @@ onMounted(() => {
             disabled />
         </VCol>
         <VCol cols="12" md="6">
-          <VTextField v-model="fecha" type="date" label="Fecha" :readonly="cerrado" />
+          <VTextField v-model="fecha" type="date" label="Fecha" :readonly="cerrado" disabled/>
         </VCol>
         <VCol cols="12" md="6">
           <v-autocomplete :items="subdivisions" item-title="nombre" label="Subdivisión" v-model="subseleccionado"

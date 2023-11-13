@@ -65,7 +65,7 @@ const subseleccionadoParaTabs = computed(() => {
             disabled />
         </VCol>
         <VCol cols="12" md="6">
-          <VTextField v-model="fecha" type="datetime" label="Fecha" />
+          <VTextField v-model="fecha" type="datetime" label="Fecha" disabled/>
         </VCol>
         <VCol cols="12" md="6">
           <v-autocomplete :items="subdivisions" item-title="nombre" label="Subdivisión" v-model="subseleccionado"
