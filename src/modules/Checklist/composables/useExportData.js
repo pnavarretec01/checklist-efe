@@ -60,7 +60,7 @@ export default function useExportData() {
               "PK Formulario ID": data.pk_formulario_id,
               "Nombre Supervisor": data.nombre_supervisor,
               Fecha: data.fecha,
-              "Subdivision ID": data.subdivision.pk_subdivision_id,
+              // "Subdivision ID": data.subdivision.pk_subdivision_id,
               "Subdivision Nombre": data.subdivision.nombre,
               "Observacion General": data.observacion_general,
               "PK Inicio": data.pk_inicio,
