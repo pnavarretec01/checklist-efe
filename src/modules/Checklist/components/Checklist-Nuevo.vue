@@ -17,7 +17,9 @@ function formatDateTime(date) {
   const YYYY = date.getFullYear();
   const MM = String(date.getMonth() + 1).padStart(2, '0');
   const DD = String(date.getDate()).padStart(2, '0');
-  return `${YYYY}-${MM}-${DD}`;
+  const HH = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  return `${YYYY}-${MM}-${DD}T${HH}:${mm}`;
 }
 
 watch(subseleccionado, (nuevoValor, oldName) => {
@@ -65,7 +67,7 @@ const subseleccionadoParaTabs = computed(() => {
             disabled />
         </VCol>
         <VCol cols="12" md="6">
-          <VTextField v-model="fecha" type="datetime" label="Fecha" disabled/>
+          <VTextField v-model="fecha" type="datetime-local" label="Fecha" />
         </VCol>
         <VCol cols="12" md="6">
           <v-autocomplete :items="subdivisions" item-title="nombre" label="Subdivisión" v-model="subseleccionado"
@@ -76,10 +78,10 @@ const subseleccionadoParaTabs = computed(() => {
           </v-autocomplete>
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" readonly />
+          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" />
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkTermino" type="number" label="Pk Término" readonly />
+          <VTextField v-model="pkTermino" type="number" label="Pk Término" />
         </VCol>
         <VCol cols="12">
           <VTextarea v-model="observacionGeneral" rows="3" label="Observación general"></VTextarea>

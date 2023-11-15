@@ -32,6 +32,29 @@ watch(subseleccionado, (nuevoValor, oldName) => {
   pkInicio.value = nuevoValor.pk_inicio
   pkTermino.value = nuevoValor.pk_termino
 });
+watch(fecha, (nuevoValor, oldName) => {
+  fecha.value = formatDate(fecha.value)
+});
+
+
+function formatDate(date) {
+  const d = new Date(date),
+    month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear(),
+    hh = d.getHours(),
+    mm = d.getMinutes(),
+    ss = '00';
+
+  if (month.length < 2)
+    month = '0' + month;
+  if (day.length < 2)
+    day = '0' + day;
+
+
+  return `${year}-${month}-${day}T${hh}:${mm}:${ss}`;
+}
+
 
 const {
   currentTab,
@@ -72,7 +95,7 @@ onMounted(() => {
             disabled />
         </VCol>
         <VCol cols="12" md="6">
-          <VTextField v-model="fecha" type="date" label="Fecha" :readonly="cerrado" disabled/>
+          <VTextField v-model="fecha" type="datetime-local" label="Fecha" :readonly="cerrado" disabled />
         </VCol>
         <VCol cols="12" md="6">
           <v-autocomplete :items="subdivisions" item-title="nombre" label="Subdivisión" v-model="subseleccionado"

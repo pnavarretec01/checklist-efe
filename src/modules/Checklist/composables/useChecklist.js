@@ -193,14 +193,28 @@ export default function useChecklist(
       return false;
     }
 
-    if (!pkInicio.value) {
-      snackbarMessage.value = "Por favor, ingrese un Pk Inicio.";
+    if (
+      pkInicio.value === null ||
+      pkInicio.value === undefined ||
+      isNaN(pkInicio.value) ||
+      pkInicio.value < 0
+    ) {
+      snackbarMessage.value =
+        "PK Inicio debe ser un número no negativo y es requerido.";
+      snackbarColor.value = "info";
       snackbar.value = true;
       return false;
     }
 
-    if (!pkTermino.value) {
-      snackbarMessage.value = "Por favor, ingrese un Pk Termino.";
+    if (
+      pkTermino.value === null ||
+      pkTermino.value === undefined ||
+      isNaN(pkTermino.value) ||
+      pkTermino.value < 0
+    ) {
+      snackbarMessage.value =
+        "PK Inicio debe ser un número no negativo y es requerido.";
+      snackbarColor.value = "info";
       snackbar.value = true;
       return false;
     }

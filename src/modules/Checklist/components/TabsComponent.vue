@@ -78,8 +78,7 @@ const validatePK = (pk, minPK, maxPK) => {
       </VTabs>
       <VWindow v-model="currentTab">
         <VWindowItem v-for="item in parentItems" :key="item.id" :value="item.id">
-          <h2 class="pa-5">{{ item.nombre }}</h2>
-          <div v-for="(subitem, indexSubItem) in item.items" :key="indexSubItem">
+          <div class="mt-4" v-for="(subitem, indexSubItem) in item.items" :key="indexSubItem">
             <h3>{{ subitem.nombre }}</h3>
             <VRow v-for="(dataSubitem, dataIndex) in subitem.data" :key="dataIndex" align="center" class="mb-2">
               <VCol cols="6" md="3">

@@ -156,7 +156,8 @@ const isClosed = (value) => {
             </VList>
           </VMenu>
         </VBtn>
-        <VIcon small @click="editItem(item)" color="primary">mdi-pencil</VIcon>
+        <VIcon small @click="editItem(item)" color="primary" v-if="!item.value.cerrado">mdi-pencil</VIcon>
+        <VIcon small @click="editItem(item)" color="primary" v-else>mdi-eye</VIcon>
         <VIcon small @click="prepareDeleteItem(item)" color="error">mdi-delete</VIcon>
 
       </template>
