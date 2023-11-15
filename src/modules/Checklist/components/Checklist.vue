@@ -29,9 +29,13 @@ const observacionGeneral = ref('');
 const subseleccionado = ref([]);
 
 watch(subseleccionado, (nuevoValor, oldName) => {
-  pkInicio.value = nuevoValor.pk_inicio
-  pkTermino.value = nuevoValor.pk_termino
+  if (nuevoValor.pk_inicio !== null || nuevoValor.pk_inicio !== undefined &&
+    nuevoValor.pk_termino !== null || nuevoValor.pk_termino !== undefined) {
+    pkInicio.value = nuevoValor.pk_inicio
+    pkTermino.value = nuevoValor.pk_termino
+  }
 });
+
 watch(fecha, (nuevoValor, oldName) => {
   fecha.value = formatDate(fecha.value)
 });
@@ -98,18 +102,19 @@ onMounted(() => {
           <VTextField v-model="fecha" type="datetime-local" label="Fecha" :readonly="cerrado" disabled />
         </VCol>
         <VCol cols="12" md="6">
-          <v-autocomplete :items="subdivisions" item-title="nombre" label="Subdivisión" v-model="subseleccionado"
-            return-object clearable :disabled="cerrado">
+          <v-autocomplete :items="subdivisions"
+            :item-title="(item) => `${item.nombre}  (PKs: ${item.pk_inicio} - ${item.pk_termino})`" label="Subdivisión"
+            v-model="subseleccionado" return-object>
             <template v-slot:no-data>
               <div class="px-4">No existen datos</div>
             </template>
           </v-autocomplete>
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" disabled />
+          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" />
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkTermino" type="number" label="Pk Término" disabled />
+          <VTextField v-model="pkTermino" type="number" label="Pk Término" />
         </VCol>
         <VCol cols="12">
           <VTextarea v-model="observacionGeneral" rows="3" label="Observación general" :readonly="cerrado"></VTextarea>

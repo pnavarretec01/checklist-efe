@@ -23,8 +23,11 @@ function formatDateTime(date) {
 }
 
 watch(subseleccionado, (nuevoValor, oldName) => {
-  pkInicio.value = nuevoValor.pk_inicio
-  pkTermino.value = nuevoValor.pk_termino
+  if (nuevoValor.pk_inicio !== null || nuevoValor.pk_inicio !== undefined &&
+    nuevoValor.pk_termino !== null || nuevoValor.pk_termino !== undefined) {
+    pkInicio.value = nuevoValor.pk_inicio
+    pkTermino.value = nuevoValor.pk_termino
+  }
 });
 
 const {
@@ -70,8 +73,9 @@ const subseleccionadoParaTabs = computed(() => {
           <VTextField v-model="fecha" type="datetime-local" label="Fecha" />
         </VCol>
         <VCol cols="12" md="6">
-          <v-autocomplete :items="subdivisions" item-title="nombre" label="Subdivisión" v-model="subseleccionado"
-            return-object clearable>
+          <v-autocomplete :items="subdivisions"
+            :item-title="(item) => `${item.nombre}  (PKs: ${item.pk_inicio} - ${item.pk_termino})`" label="Subdivisión"
+            v-model="subseleccionado" return-object>
             <template v-slot:no-data>
               <div class="px-4">No existen datos</div>
             </template>
