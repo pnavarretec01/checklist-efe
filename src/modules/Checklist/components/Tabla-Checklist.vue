@@ -23,7 +23,7 @@ const closeDialog = () => {
 
 const { exportData, exportAllData } = useExportData();
 const downloadAllItems = () => {
-  exportAllData(items.value, 'xlsx'); // O 'csv' si prefieres ese formato
+  exportAllData(items.value, 'xlsx');
 };
 
 const {
@@ -54,7 +54,7 @@ onMounted(() => {
 
 const headers = [
   { title: 'Supervisor', key: 'nombre_supervisor' },
-  { title: 'Fecha', key: 'fecha' },
+  { title: 'Fecha', key: 'fecha', value: item => `${formatDate(item.fecha)}`, },
   { title: 'PK Inicio', key: 'pk_inicio' },
   { title: 'PK Termino', key: 'pk_termino' },
   { title: 'Sub División', key: 'subdivision' },
@@ -103,6 +103,24 @@ const prepareDeleteItem = (item) => {
 const isClosed = (value) => {
   return value === true || value === 1;
 };
+
+function formatDate(date) {
+  const d = new Date(date),
+    month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear(),
+    hh = d.getHours(),
+    mm = d.getMinutes(),
+    ss = '00';
+
+  if (month.length < 2)
+    month = '0' + month;
+  if (day.length < 2)
+    day = '0' + day;
+
+
+  return `${year}-${month}-${day} ${hh}:${mm}`;
+}
 </script>
 
 <template>
