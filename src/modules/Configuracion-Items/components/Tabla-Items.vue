@@ -10,7 +10,6 @@ import { VDataTable } from 'vuetify/labs/VDataTable'
 const { items, subitems, error, fetchItems, fetchSubitemsForItem, createItem, apiCreateSubitem,
   updateItem, apiUpdateSubitem, apiDeleteItem, apiDeleteSubitem } = useItemsApi();
 
-
 /** funcionalidades tabla */
 const headers = [
   { title: 'ID', key: 'pk_item_id' },

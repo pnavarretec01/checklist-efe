@@ -22,6 +22,7 @@ export default function useChecklist(
   const error = ref(null);
   const parentItems = ref([]);
   const cerrado = ref("");
+  const loading = ref(false);
 
   const snackbar = ref(false);
   const snackbarMessage = ref("");
@@ -302,6 +303,8 @@ export default function useChecklist(
             observacion: data.observacion,
             fk_subitem_id: subitem.id,
             fk_item_id: item.id,
+            nombreItem: item.nombre,
+            nombreSubitem: subitem.nombre,
           }))
         )
       ),
