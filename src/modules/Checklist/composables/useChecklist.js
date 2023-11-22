@@ -283,23 +283,25 @@ export default function useChecklist(
   const sendCaracteristicas = async (dataToSave) => {
     const dataToSend = {
       formulario: {
+        pk_formulario_id: Number(itemId.value),
         nombre_supervisor: nombreSupervisor.value,
         fecha: fecha.value,
-        subdivision: subdivision.value,
+        subdivision: subseleccionado.value.pk_subdivision_id,
         pk_inicio: pkInicio.value,
         pk_termino: pkTermino.value,
         observacion_general: observacionGeneral.value,
-        subdivision: subseleccionado.value.pk_subdivision_id,
         cerrado: dataToSave.cerrado,
       },
+
       features: parentItems.value.flatMap((item) =>
         item.items.flatMap((subitem) =>
           subitem.data.map((data) => ({
+            pk_formulario_id: itemId.value,
             pk: data.pk,
             collera: data.collera,
             observacion: data.observacion,
-            subitem_id: subitem.id,
-            item_id: item.id,
+            fk_subitem_id: subitem.id,
+            fk_item_id: item.id,
           }))
         )
       ),
@@ -453,8 +455,13 @@ export default function useChecklist(
       router.push({ name: "checklist-page" });
     }
 
+    const dataToSave = {
+      parentItems: parentItems.value,
+      cerrado: cerrado,
+    };
+
     if (online.value) {
-      await updateCaracteristicas(cerrado);
+      await sendCaracteristicas(dataToSave);
     } else {
       updateItemInDataTableLocalStorage(itemToUpdateTablaOffline);
       storeEditedItemsInLocalStorage(itemToUpdate);

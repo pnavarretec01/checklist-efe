@@ -248,9 +248,7 @@ export default function useChecklist(
     }
 
     // Continuar con la lógica de guardado si todas las validaciones pasan
-    if (cerrado == 1) {
-      return;
-    }
+
     loading.value = true;
     const dataToSave = {
       parentItems: parentItems.value,
@@ -264,6 +262,7 @@ export default function useChecklist(
     try {
       if (!isConnected.value) {
         const id = localStorage.getItem("formularioID");
+
         const dataToSaveLocal = {
           formulario: {
             nombre_supervisor: nombreSupervisor.value,
@@ -271,21 +270,24 @@ export default function useChecklist(
             pk_inicio: pkInicio.value,
             pk_termino: pkTermino.value,
             observacion_general: observacionGeneral.value,
-            subdivision: subseleccionado.value.pk_subdivision_id,
             cerrado: dataToSave.cerrado,
+            subdivision: subseleccionado.value.pk_subdivision_id,
             needsSync: true,
           },
           features: [],
         };
+
         for (let item of parentItems.value) {
           for (let subitem of item.items) {
             for (let data of subitem.data) {
-              dataToSaveLocal.features.push({
+              dataToSend.features.push({
                 pk: data.pk,
                 collera: data.collera,
                 observacion: data.observacion,
-                subitem_id: subitem.id,
-                item_id: item.id,
+                fk_subitem_id: subitem.id,
+                fk_item_id: item.id,
+                nombreItem: item.nombre,
+                nombreSubitem: subitem.nombre,
               });
             }
           }
@@ -366,8 +368,10 @@ export default function useChecklist(
               pk: data.pk,
               collera: data.collera,
               observacion: data.observacion,
-              subitem_id: subitem.id,
-              item_id: item.id,
+              fk_subitem_id: subitem.id,
+              fk_item_id: item.id,
+              nombreItem: item.nombre,
+              nombreSubitem: subitem.nombre,
             });
           }
         }
