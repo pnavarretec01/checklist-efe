@@ -23,14 +23,28 @@ export default function useChecklist(
   const parentItems = ref([]);
   const cerrado = ref("");
   const loading = ref(false);
-
   const snackbar = ref(false);
   const snackbarMessage = ref("");
   const snackbarColor = ref("info");
-
   const online = ref(navigator.onLine);
-
   const subdivisions = ref([]);
+
+  const syncButtonDisabled = ref(false);
+  const syncButtonLabel = ref("Sincronizar");
+
+  const sincronizarFunc = () => {
+    if (syncButtonLabel.value === "Sincronizando") {
+      fetchItemsSinSincronizar();
+    } else {
+      fetchItems();
+      syncButtonDisabled.value = true;
+      syncButtonLabel.value = "Sincronizando";
+      setTimeout(() => {
+        syncButtonDisabled.value = false;
+        syncButtonLabel.value = "Sincronizar";
+      }, 10000);
+    }
+  };
 
   const fetchSubdivisions = async () => {
     try {
@@ -67,6 +81,13 @@ export default function useChecklist(
       snackbarColor.value = "success";
       fetchItems();
       fetchSubdivisions();
+
+      syncButtonDisabled.value = true;
+      syncButtonLabel.value = "Sincronizando";
+      setTimeout(() => {
+        syncButtonDisabled.value = false;
+        syncButtonLabel.value = "Sincronizar";
+      }, 10000);
     } else {
       snackbar.value = true;
       snackbarMessage.value = "Sin Conexión a Internet";
@@ -133,9 +154,50 @@ export default function useChecklist(
 
   const fetchItems = async () => {
     if (online.value) {
+      syncButtonDisabled.value = true;
+      syncButtonLabel.value = "Sincronizando";
+      setTimeout(() => {
+        syncButtonDisabled.value = false;
+        syncButtonLabel.value = "Sincronizar";
+      }, 10000);
+
       await syncPendingItems();
       await syncEditedItems();
       await syncDeletedItems();
+      try {
+        const response = await axios.get(apiURL + "formularios");
+        items.value = response.data.map((item) => ({
+          ...item,
+          needsSync: false,
+        }));
+        storeItemsInLocalStorage(items.value);
+        snackbar.value = true;
+        snackbarMessage.value = "Datos cargados con éxito!";
+        snackbarColor.value = "success";
+        return response.data.data;
+      } catch (err) {
+        error.value = err.message;
+        snackbar.value = true;
+        snackbarMessage.value = err.message;
+        snackbarColor.value = "error";
+      }
+    } else {
+      items.value = getItemsFromLocalStorage();
+      snackbar.value = true;
+      snackbarMessage.value =
+        "Estás offline. Cargando datos desde el almacenamiento local";
+      snackbarColor.value = "warning";
+    }
+  };
+  const fetchItemsSinSincronizar = async () => {
+    syncButtonDisabled.value = true;
+    syncButtonLabel.value = "Sincronizando";
+    setTimeout(() => {
+      syncButtonDisabled.value = false;
+      syncButtonLabel.value = "Sincronizar";
+    }, 10000);
+
+    if (online.value) {
       try {
         const response = await axios.get(apiURL + "formularios");
         items.value = response.data.map((item) => ({
@@ -329,7 +391,6 @@ export default function useChecklist(
   // Obtiene el formulario por ID.
   const fetchFormDataById = async (id) => {
     try {
-      console.log(id);
       nombreSupervisor.value = formulario.nombre_supervisor;
       fecha.value = formulario.fecha;
       subdivision.value = formulario.subdivision;
@@ -375,6 +436,10 @@ export default function useChecklist(
     saveToLocalStorage("checklist_datatabla", items);
   };
 
+  const getFormDataToSaveFromLocalStorage = () => {
+    return JSON.parse(localStorage.getItem("formDataToSave") || "[]");
+  };
+
   const storeFormDataToSaveInLocalStorage = (item) => {
     let formDataToSave = getFormDataToSaveFromLocalStorage();
     const index = formDataToSave.findIndex(
@@ -386,10 +451,6 @@ export default function useChecklist(
       formDataToSave.push(item);
     }
     localStorage.setItem("formDataToSave", JSON.stringify(formDataToSave));
-  };
-
-  const getFormDataToSaveFromLocalStorage = () => {
-    return JSON.parse(localStorage.getItem("formDataToSave") || "[]");
   };
 
   const updateData = async (cerrado) => {
@@ -422,13 +483,45 @@ export default function useChecklist(
       })),
     };
 
+    let pkFormularioId;
+    if (itemId.value.includes("a")) {
+      pkFormularioId = itemId.value;
+    } else {
+      pkFormularioId = Number(itemId.value);
+    }
+
+    const dataToSaveLocal = {
+      formulario: {
+        pk_formulario_id: pkFormularioId,
+        nombre_supervisor: nombreSupervisor.value,
+        fecha: fecha.value,
+        pk_inicio: pkInicio.value,
+        pk_termino: pkTermino.value,
+        observacion_general: observacionGeneral.value,
+        cerrado: cerrado,
+        subdivision: subseleccionado.value.pk_subdivision_id,
+      },
+      features: [],
+    };
+    for (let item of parentItems.value) {
+      for (let subitem of item.items) {
+        for (let data of subitem.data) {
+          dataToSaveLocal.features.push({
+            pk: data.pk,
+            collera: data.collera,
+            observacion: data.observacion,
+            fk_subitem_id: subitem.id,
+            fk_item_id: item.id,
+            nombreItem: item.nombre,
+            nombreSubitem: subitem.nombre,
+          });
+        }
+      }
+    }
+
     let itemToUpdate, itemToUpdateTablaOffline;
     if (itemId.value.includes("a")) {
-      itemToUpdate = {
-        ...baseData,
-        pk_formulario_id: itemId.value,
-        subdivision: subseleccionado.value.pk_subdivision_id,
-      };
+      updateItemInFormDataToSaveLocalStorage(dataToSaveLocal);
       itemToUpdateTablaOffline = {
         ...baseData,
         pk_formulario_id: itemId.value,
@@ -439,11 +532,6 @@ export default function useChecklist(
       snackbarColor.value = "warning";
       router.push({ name: "checklist-page" });
     } else {
-      itemToUpdate = {
-        ...baseData,
-        pk_formulario_id: Number(itemId.value),
-        subdivision: subseleccionado.value.pk_subdivision_id,
-      };
       itemToUpdateTablaOffline = {
         ...baseData,
         pk_formulario_id: Number(itemId.value),
@@ -465,12 +553,45 @@ export default function useChecklist(
       await sendCaracteristicas(dataToSave);
     } else {
       updateItemInDataTableLocalStorage(itemToUpdateTablaOffline);
-      storeEditedItemsInLocalStorage(itemToUpdate);
+      storeEditedItemsInLocalStorage(dataToSaveLocal);
       snackbar.value = true;
       snackbarColor.value = "warning";
       router.push({ name: "checklist-page" });
     }
   };
+
+  function updateItemInFormDataToSaveLocalStorage(updatedItem) {
+    let formDataToSave = getFormDataToSaveFromLocalStorage();
+    const index = formDataToSave.findIndex(
+      (fItem) =>
+        fItem.formulario.pk_formulario_id ===
+        updatedItem.formulario.pk_formulario_id
+    );
+
+    if (index !== -1) {
+      formDataToSave[index] = updatedItem;
+    } else {
+      formDataToSave.push(updatedItem);
+    }
+
+    localStorage.setItem("formDataToSave", JSON.stringify(formDataToSave));
+  }
+
+  // function updateItemInDataTableLocalStorage(updatedItem) {
+  //   let items = getItemsFromLocalStorage();
+  //   const index = items.findIndex(
+  //     (item) =>
+  //       item.pk_formulario_id === updatedItem.formulario.pk_formulario_id
+  //   );
+
+  //   if (index !== -1) {
+  //     items[index] = updatedItem;
+  //   } else {
+  //     items.push(updatedItem);
+  //   }
+
+  //   localStorage.setItem("checklist_datatabla", JSON.stringify(items));
+  // }
 
   // Actualiza las características en la API
   const updateCaracteristicas = async (cerrado) => {
@@ -501,7 +622,7 @@ export default function useChecklist(
 
     try {
       const response = await axios.put(
-        apiURL + "formularios/" + itemId.value,
+        apiURL + "formularios/" + Number(itemId.value),
         dataToSend
       );
       snackbar.value = true;
@@ -576,7 +697,10 @@ export default function useChecklist(
 
     for (const item of editedItems) {
       try {
-        await axios.put(apiURL + "formularios/" + item.pk_formulario_id, item);
+        await axios.put(
+          apiURL + "formularios/" + Number(item.formulario.pk_formulario_id),
+          item
+        );
         // Si se sincroniza con éxito, elimina el ítem de la lista de items editados.
         const index = editedItems.findIndex(
           (eItem) => eItem.pk_formulario_id === item.pk_formulario_id
@@ -643,5 +767,9 @@ export default function useChecklist(
     snackbarColor,
     cerrado,
     subdivisions,
+    fetchItemsSinSincronizar,
+    syncButtonDisabled,
+    syncButtonLabel,
+    sincronizarFunc,
   };
 }

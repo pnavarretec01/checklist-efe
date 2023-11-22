@@ -421,9 +421,9 @@ export default function useChecklist(
 
       fetchItems(); // Actualizar lista de items
     } else {
-      snackbar.value = true;
-      snackbarMessage.value = "No hay datos para sincronizar";
-      snackbarColor.value = "warning";
+      // snackbar.value = true;
+      // snackbarMessage.value = "No hay datos para sincronizar";
+      // snackbarColor.value = "warning";
     }
 
     loading.value = false; // Ocultar la alerta de carga

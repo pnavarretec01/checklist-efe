@@ -33,6 +33,9 @@ const {
   snackbar: snackbar1,
   snackbarMessage: snackbarMessage1,
   snackbarColor: snackbarColor1,
+  syncButtonDisabled,
+  syncButtonLabel,
+  sincronizarFunc
 } = useChecklist();
 
 const {
@@ -44,7 +47,7 @@ const {
 
 const sincronizar = () => {
   manualSync()
-  fetchItems()
+  //fetchItems()
 }
 
 onMounted(() => {
@@ -133,8 +136,8 @@ function formatDate(date) {
       </div>
       <div class="d-flex flex-column flex-md-row gap-3">
         <div>
-          <VBtn prepend-icon="mdi-sync" @click="sincronizar">
-            Sincronizar
+          <VBtn prepend-icon="mdi-sync" :disabled="syncButtonDisabled" @click="sincronizarFunc">
+            {{ syncButtonLabel }}
           </VBtn>
         </div>
         <div>
