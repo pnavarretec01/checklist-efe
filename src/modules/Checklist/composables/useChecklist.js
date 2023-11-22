@@ -329,8 +329,6 @@ export default function useChecklist(
   // Obtiene el formulario por ID.
   const fetchFormDataById = async (id) => {
     try {
-      // const response = await axios.get(apiURL + "formularios/" + id);
-      //const formData = response.data;
       nombreSupervisor.value = formulario.nombre_supervisor;
       fecha.value = formulario.fecha;
       subdivision.value = formulario.subdivision;
@@ -339,7 +337,6 @@ export default function useChecklist(
       observacionGeneral.value = formulario.observacion_general;
       subseleccionado.value = formulario.subdivision;
       cerrado.value = formulario.cerrado;
-
       parentItems.value = mapStructure(formulario);
     } catch (err) {
       error.value = err.message;

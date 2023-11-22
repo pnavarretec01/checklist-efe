@@ -36,28 +36,27 @@ watch(subseleccionado, (nuevoValor, oldName) => {
   }
 });
 
-watch(fecha, (nuevoValor, oldName) => {
-  fecha.value = formatDate(fecha.value)
-});
-
-
 function formatDate(date) {
-  const d = new Date(date),
-    month = '' + (d.getMonth() + 1),
-    day = '' + d.getDate(),
-    year = d.getFullYear(),
-    hh = d.getHours(),
-    mm = d.getMinutes(),
-    ss = '00';
+  const d = new Date(date);
+  let month = '' + (d.getMonth() + 1);
+  let day = '' + d.getDate();
+  const year = d.getFullYear();
+  let hh = d.getHours();
+  let mm = d.getMinutes();
+  const ss = '00';
 
-  if (month.length < 2)
-    month = '0' + month;
-  if (day.length < 2)
-    day = '0' + day;
-
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
 
   return `${year}-${month}-${day}T${hh}:${mm}:${ss}`;
 }
+
+watch(fecha, (nuevoValor, oldValue) => {
+  const fechaFormateada = formatDate(nuevoValor);
+  if (fechaFormateada !== nuevoValor) {
+    fecha.value = fechaFormateada;
+  }
+});
 
 
 const {
