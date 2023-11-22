@@ -135,7 +135,7 @@ export default function useChecklist(
     if (online.value) {
       await syncPendingItems();
       await syncEditedItems();
-      //await syncDeletedItems();
+      await syncDeletedItems();
       try {
         const response = await axios.get(apiURL + "formularios");
         items.value = response.data.map((item) => ({
@@ -329,6 +329,7 @@ export default function useChecklist(
   // Obtiene el formulario por ID.
   const fetchFormDataById = async (id) => {
     try {
+      console.log(id);
       nombreSupervisor.value = formulario.nombre_supervisor;
       fecha.value = formulario.fecha;
       subdivision.value = formulario.subdivision;
@@ -621,7 +622,7 @@ export default function useChecklist(
     localStorage.setItem(
       "checklist_deletedItems",
       JSON.stringify(deletedItems)
-    ); // Actualizar localStorage.
+    );
   };
 
   return {

@@ -261,11 +261,12 @@ export default function useChecklist(
   const sendCaracteristicas = async (dataToSave) => {
     try {
       if (!isConnected.value) {
-        console.log("aca");
         const id = localStorage.getItem("formularioID");
+        const idFake = Math.floor(Math.random() * 9999) + "a";
 
         const dataToSaveLocal = {
           formulario: {
+            pk_formulario_id: idFake,
             nombre_supervisor: nombreSupervisor.value,
             fecha: fecha.value,
             pk_inicio: pkInicio.value,
@@ -291,7 +292,6 @@ export default function useChecklist(
             }
           }
         }
-        console.log(dataToSaveLocal);
 
         let offlineForms = getFromLocalStorage("formDataToSave") || [];
         offlineForms.push(dataToSaveLocal);
@@ -305,7 +305,7 @@ export default function useChecklist(
 
         //data para pushear a la tabla offline, cambia estructura de la que se envía
         const datatoPushTable = {
-          pk_formulario_id: Math.floor(Math.random() * 9999) + "a",
+          pk_formulario_id: idFake,
           nombre_supervisor: nombreSupervisor.value,
           fecha: fecha.value,
           pk_inicio: pkInicio.value,
@@ -337,12 +337,10 @@ export default function useChecklist(
             };
           }),
         };
-        console.log("aca 2");
         const storedChecklistData =
           getFromLocalStorage("checklist_datatabla") || [];
         storedChecklistData.unshift(datatoPushTable);
         saveToLocalStorage("checklist_datatabla", storedChecklistData);
-        console.log("aca3");
 
         router.push({ name: "checklist-page" });
 
@@ -396,31 +394,39 @@ export default function useChecklist(
   };
 
   const syncOfflineData = async () => {
-    const offlineForms = getFromLocalStorage("formDataToSave");
+    const offlineForms = getFromLocalStorage("formDataToSave") || [];
+    let failedSyncForms = [];
+    loading.value = true; // Mostrar la alerta de carga
 
     if (offlineForms && isConnected.value) {
       for (let dataToSave of offlineForms) {
         try {
-          const response = await axios.post(
-            apiURL + "formularios/",
-            dataToSave
-          );
-
+          await axios.post(apiURL + "formularios/", dataToSave);
           snackbar.value = true;
           snackbarMessage.value = "Datos sincronizados con éxito";
           snackbarColor.value = "success";
-          fetchItems();
         } catch (err) {
           console.error("syncOfflineData: Error al sincronizar", err);
+          failedSyncForms.push(dataToSave); // Agregar a la lista de formularios que fallaron
         }
       }
-      // Una vez que hayamos intentado sincronizar todos los formularios, limpiamos el almacenamiento local.
-      localStorage.removeItem("formDataToSave");
+
+      if (failedSyncForms.length > 0) {
+        // Si hay formularios que fallaron, actualiza localStorage con ellos
+        saveToLocalStorage("formDataToSave", failedSyncForms);
+      } else {
+        // Si todos se sincronizaron con éxito, limpia el localStorage
+        localStorage.removeItem("formDataToSave");
+      }
+
+      fetchItems(); // Actualizar lista de items
     } else {
       snackbar.value = true;
       snackbarMessage.value = "No hay datos para sincronizar";
       snackbarColor.value = "warning";
     }
+
+    loading.value = false; // Ocultar la alerta de carga
   };
 
   // Sincronizar datos guardados offline cuando hay conexión
