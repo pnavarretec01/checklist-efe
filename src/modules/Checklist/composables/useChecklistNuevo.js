@@ -261,6 +261,7 @@ export default function useChecklist(
   const sendCaracteristicas = async (dataToSave) => {
     try {
       if (!isConnected.value) {
+        console.log("aca");
         const id = localStorage.getItem("formularioID");
 
         const dataToSaveLocal = {
@@ -272,15 +273,13 @@ export default function useChecklist(
             observacion_general: observacionGeneral.value,
             cerrado: dataToSave.cerrado,
             subdivision: subseleccionado.value.pk_subdivision_id,
-            needsSync: true,
           },
           features: [],
         };
-
         for (let item of parentItems.value) {
           for (let subitem of item.items) {
             for (let data of subitem.data) {
-              dataToSend.features.push({
+              dataToSaveLocal.features.push({
                 pk: data.pk,
                 collera: data.collera,
                 observacion: data.observacion,
@@ -292,11 +291,12 @@ export default function useChecklist(
             }
           }
         }
+        console.log(dataToSaveLocal);
 
         let offlineForms = getFromLocalStorage("formDataToSave") || [];
-
         offlineForms.push(dataToSaveLocal);
         saveToLocalStorage("formDataToSave", offlineForms);
+
         isSavedOffline.value = true;
         snackbar.value = true;
         snackbarMessage.value =
@@ -337,11 +337,12 @@ export default function useChecklist(
             };
           }),
         };
-
+        console.log("aca 2");
         const storedChecklistData =
           getFromLocalStorage("checklist_datatabla") || [];
         storedChecklistData.unshift(datatoPushTable);
         saveToLocalStorage("checklist_datatabla", storedChecklistData);
+        console.log("aca3");
 
         router.push({ name: "checklist-page" });
 

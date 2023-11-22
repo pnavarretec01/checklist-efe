@@ -392,7 +392,7 @@ export default function useChecklist(
   };
 
   const updateData = async (cerrado) => {
-    if (cerrado === 1 && !validateForm()) {
+    if (!validateForm()) {
       return;
     }
 
