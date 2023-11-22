@@ -86,7 +86,7 @@ const validatePK = (pk, minPK, maxPK) => {
                   @blur="dataSubitem.pk = validatePK(dataSubitem.pk, props.pkInicio, props.pkTermino)" />
               </VCol>
               <VCol cols="6" md="3">
-                <VTextField v-model="dataSubitem.collera" label="Collera"
+                <VTextField v-model.number="dataSubitem.collera" type="number" label="Collera"
                   @blur="dataSubitem.pk = validatePK(dataSubitem.pk, props.pkInicio, props.pkTermino)" />
               </VCol>
               <VCol cols="12" md="5"
