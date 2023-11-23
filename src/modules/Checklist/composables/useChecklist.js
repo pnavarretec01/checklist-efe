@@ -296,30 +296,81 @@ export default function useChecklist(
       return;
     }
     loading.value = true;
+
+    const dataToSend = {
+      formulario: {
+        pk_formulario_id: Number(itemId.value),
+        nombre_supervisor: nombreSupervisor.value,
+        fecha: fecha.value,
+        subdivision: subseleccionado.value.pk_subdivision_id,
+        pk_inicio: pkInicio.value,
+        pk_termino: pkTermino.value,
+        observacion_general: observacionGeneral.value,
+        cerrado: cerrado,
+      },
+
+      features: parentItems.value.flatMap((item) =>
+        item.items.flatMap((subitem) =>
+          subitem.data.map((data) => ({
+            pk_formulario_id: itemId.value,
+            pk: data.pk,
+            collera: data.collera,
+            observacion: data.observacion,
+            fk_subitem_id: subitem.id,
+            fk_item_id: item.id,
+            nombreItem: item.nombre,
+            nombreSubitem: subitem.nombre,
+          }))
+        )
+      ),
+    };
+
     try {
-      if (online.value) {
-        await sendCaracteristicas({
-          parentItems: parentItems.value,
-          cerrado: cerrado,
-        });
+      if (itemId.value.includes("a")) {
+        // Guardar offline en formDataToSave
+        storeFormDataToSaveInLocalStorage(dataToSave);
       } else {
-        // si esta offline, guardar el ítem en localStorage
-        const pendingItems = getItemsFromLocalStorage();
-        pendingItems.push({
-          ...dataToSend,
-          needsSync: true, //marca el item como pendiente de sincronización
-        });
-        storeItemsInLocalStorage(pendingItems);
-        snackbar.value = true;
-        snackbarMessage.value =
-          "Guardado localmente. Se sincronizará cuando esté online.";
-        snackbarColor.value = "warning";
-        router.push({ name: "checklist-page" });
+        // Guardar offline en checklist:editedItems
+        storeItemsInLocalStorage(dataToSave);
       }
+      snackbar.value = true;
+      snackbarMessage.value =
+        "Formulario guardado localmente. Se sincronizará cuando esté online.";
+      snackbarColor.value = "info";
     } catch (error) {
+      snackbar.value = true;
+      snackbarMessage.value =
+        "Error al guardar el formulario: " + error.message;
+      snackbarColor.value = "error";
     } finally {
       loading.value = false;
+      router.push({ name: "checklist-page" });
     }
+
+    // try {
+    //   if (online.value) {
+    //     await sendCaracteristicas({
+    //       parentItems: parentItems.value,
+    //       cerrado: cerrado,
+    //     });
+    //   } else {
+    //     // si esta offline, guardar el ítem en localStorage
+    //     const pendingItems = getItemsFromLocalStorage();
+    //     pendingItems.push({
+    //       ...dataToSend,
+    //       needsSync: true, //marca el item como pendiente de sincronización
+    //     });
+    //     storeItemsInLocalStorage(pendingItems);
+    //     snackbar.value = true;
+    //     snackbarMessage.value =
+    //       "Guardado localmente. Se sincronizará cuando esté online.";
+    //     snackbarColor.value = "warning";
+    //     router.push({ name: "checklist-page" });
+    //   }
+    // } catch (error) {
+    // } finally {
+    //   loading.value = false;
+    // }
   };
 
   const syncPendingItems = async () => {
@@ -398,7 +449,7 @@ export default function useChecklist(
       pkTermino.value = formulario.pk_termino;
       observacionGeneral.value = formulario.observacion_general;
       subseleccionado.value = formulario.subdivision;
-      cerrado.value = formulario.cerrado;
+      cerrado.value = formulario.cerrado || false;
       parentItems.value = mapStructure(formulario);
     } catch (err) {
       error.value = err.message;
@@ -422,7 +473,7 @@ export default function useChecklist(
 
     // encuentra el índice del ítem basado en el ID (si es que existe)
     const index = items.findIndex((item) => {
-      return item.pk_formulario_id === updatedItem.pk_formulario_id;
+      return item.pk_formulario_id == updatedItem.pk_formulario_id;
     });
 
     if (index !== -1) {
@@ -521,7 +572,7 @@ export default function useChecklist(
 
     let itemToUpdate, itemToUpdateTablaOffline;
     if (itemId.value.includes("a")) {
-      updateItemInFormDataToSaveLocalStorage(dataToSaveLocal);
+      storeFormDataToSaveInLocalStorage(dataToSaveLocal);
       itemToUpdateTablaOffline = {
         ...baseData,
         pk_formulario_id: itemId.value,
@@ -552,11 +603,65 @@ export default function useChecklist(
     if (online.value) {
       await sendCaracteristicas(dataToSave);
     } else {
-      updateItemInDataTableLocalStorage(itemToUpdateTablaOffline);
-      storeEditedItemsInLocalStorage(dataToSaveLocal);
-      snackbar.value = true;
-      snackbarColor.value = "warning";
-      router.push({ name: "checklist-page" });
+      let pkFormularioId;
+      if (itemId.value.includes("a")) {
+        pkFormularioId = itemId.value;
+      } else {
+        pkFormularioId = Number(itemId.value);
+      }
+
+      const dataToSaveLocal = {
+        formulario: {
+          pk_formulario_id: pkFormularioId,
+          nombre_supervisor: nombreSupervisor.value,
+          fecha: fecha.value,
+          pk_inicio: pkInicio.value,
+          pk_termino: pkTermino.value,
+          observacion_general: observacionGeneral.value,
+          cerrado: cerrado,
+          subdivision: subseleccionado.value.pk_subdivision_id,
+        },
+        features: [],
+      };
+      for (let item of parentItems.value) {
+        for (let subitem of item.items) {
+          for (let data of subitem.data) {
+            dataToSaveLocal.features.push({
+              pk: data.pk,
+              collera: data.collera,
+              observacion: data.observacion,
+              fk_subitem_id: subitem.id,
+              fk_item_id: item.id,
+              nombreItem: item.nombre,
+              nombreSubitem: subitem.nombre,
+            });
+          }
+        }
+      }
+      if (!itemId.value.includes("a")) {
+        itemToUpdateTablaOffline = {
+          ...baseData,
+          pk_formulario_id: itemId.value,
+          subdivision: subseleccionado.value,
+        };
+        updateItemInDataTableLocalStorage(itemToUpdateTablaOffline);
+        storeEditedItemsInLocalStorage(dataToSaveLocal);
+        snackbar.value = true;
+        snackbarColor.value = "warning";
+        router.push({ name: "checklist-page" });
+      } else {
+        storeFormDataToSaveInLocalStorage(dataToSaveLocal);
+        itemToUpdateTablaOffline = {
+          ...baseData,
+          pk_formulario_id: itemId.value,
+          subdivision: subseleccionado.value,
+        };
+        updateItemInDataTableLocalStorage(itemToUpdateTablaOffline);
+        snackbar.value = true;
+        snackbarMessage.value = "Edición guardada localmente.";
+        snackbarColor.value = "warning";
+        router.push({ name: "checklist-page" });
+      }
     }
   };
 
@@ -639,39 +744,75 @@ export default function useChecklist(
 
   //elimina un formulario
   const deleteData = async (id) => {
-    if (online.value) {
-      try {
-        const response = await axios.delete(apiURL + "formularios/" + id);
-        if (response.data.success) {
-          const index = items.value.findIndex((i) => i.pk_formulario_id === id);
-          if (index !== -1) {
-            items.value.splice(index, 1);
-          }
-          snackbar.value = true;
-          snackbarMessage.value = "Checklist eliminado con éxito";
-          snackbarColor.value = "success";
-        } else {
-          error.value = err.message;
-          snackbar.value = true;
-          snackbarMessage.value = err.message;
-          snackbarColor.value = "error";
-        }
-      } catch (err) {
-        error.value = err.message;
-        snackbar.value = true;
-        snackbarMessage.value = err.message;
-        snackbarColor.value = "error";
-      }
-    } else {
-      storeDeletedItemsInLocalStorage(id);
+    if (id.toString().includes("a")) {
+      // Si el ID contiene una "a", simplemente elimina el ítem de la lista sin marcarlo para eliminar
+      removeFromFormDataToSave(id);
       const index = items.value.findIndex((i) => i.pk_formulario_id === id);
       if (index !== -1) {
         items.value.splice(index, 1);
       }
       snackbar.value = true;
       snackbarMessage.value =
-        "Checklist marcado para eliminar. Se eliminará cuando esté online.";
-      snackbarColor.value = "warning";
+        "El formulario con identificador local ha sido eliminado.";
+      snackbarColor.value = "info";
+    } else {
+      // Si no contiene una "a", sigue el proceso existente
+      if (online.value) {
+        try {
+          const response = await axios.delete(apiURL + "formularios/" + id);
+          if (response.data.success) {
+            const index = items.value.findIndex(
+              (i) => i.pk_formulario_id === id
+            );
+            if (index !== -1) {
+              items.value.splice(index, 1);
+            }
+            snackbar.value = true;
+            snackbarMessage.value = "Checklist eliminado con éxito";
+            snackbarColor.value = "success";
+          } else {
+            error.value = err.message;
+            snackbar.value = true;
+            snackbarMessage.value = err.message;
+            snackbarColor.value = "error";
+          }
+        } catch (err) {
+          error.value = err.message;
+          snackbar.value = true;
+          snackbarMessage.value = err.message;
+          snackbarColor.value = "error";
+        }
+      } else {
+        // Aquí es donde se maneja el almacenamiento de ítems eliminados offline
+        // Solo agrega el ítem a la lista si no tiene una "a"
+        storeDeletedItemsInLocalStorage(id);
+        const index = items.value.findIndex((i) => i.pk_formulario_id === id);
+        if (index !== -1) {
+          items.value.splice(index, 1);
+        }
+        snackbar.value = true;
+        snackbarMessage.value =
+          "Checklist marcado para eliminar. Se eliminará cuando esté online.";
+        snackbarColor.value = "warning";
+      }
+    }
+  };
+
+  const removeFromFormDataToSave = (id) => {
+    let formDataToSave = getFormDataToSaveFromLocalStorage();
+    const index = formDataToSave.findIndex(
+      (form) => form.pk_formulario_id == id
+    );
+    if (index !== -1) {
+      formDataToSave.splice(index, 1);
+      localStorage.setItem("formDataToSave", JSON.stringify(formDataToSave));
+      // También elimina de la lista de ítems actual en memoria si es necesario
+      const itemIndex = items.value.findIndex(
+        (item) => item.pk_formulario_id == id
+      );
+      if (itemIndex !== -1) {
+        items.value.splice(itemIndex, 1);
+      }
     }
   };
 

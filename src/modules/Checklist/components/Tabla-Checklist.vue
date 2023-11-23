@@ -122,6 +122,7 @@ function formatDate(date) {
 
   return `${year}-${month}-${day} ${hh}:${mm}`;
 }
+const showDelete = ref(false)
 </script>
 
 <template>
@@ -177,7 +178,7 @@ function formatDate(date) {
         </VBtn>
         <VIcon small @click="editItem(item)" color="primary" v-if="!item.value.cerrado">mdi-pencil</VIcon>
         <VIcon small @click="editItem(item)" color="primary" v-else>mdi-eye</VIcon>
-        <VIcon small @click="prepareDeleteItem(item)" color="error">mdi-delete</VIcon>
+        <VIcon v-if="showDelete" small @click="prepareDeleteItem(item)" color="error">mdi-delete</VIcon>
 
       </template>
       <template v-slot:item.needsSync="{ item }">

@@ -43,11 +43,6 @@ const {
   subdivisions, loading
 } = useChecklist(nombreSupervisor, fecha, subdivision, pkInicio, pkTermino, observacionGeneral, subseleccionado);
 
-const subseleccionadoParaTabs = computed(() => {
-  // console.log(subseleccionado.value);
-  return subseleccionado.value.length > 0 ? subseleccionado.value : null;
-});
-
 const validatePKRange = (pk, minPK, maxPK, pkType) => {
   if (minPK !== undefined && pk < minPK) {
     snackbarMessage.value = `El PK mínimo permitido para ${pkType} es ${minPK}`;

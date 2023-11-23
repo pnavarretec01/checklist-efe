@@ -36,35 +36,23 @@ watch(subseleccionado, (nuevoValor, oldName) => {
   }
 });
 
-function formatDate(date) {
-  const d = new Date(date);
-  let month = '' + (d.getMonth() + 1);
-  let day = '' + d.getDate();
-  const year = d.getFullYear();
-  let hh = d.getHours();
-  let mm = d.getMinutes();
-  const ss = '00';
-
-  if (month.length < 2) month = '0' + month;
-  if (day.length < 2) day = '0' + day;
-
-  return `${year}-${month}-${day}T${hh}:${mm}:${ss}`;
+function isoToLocalDateTime(isoString) {
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-watch(fecha, (nuevoValor, oldValue) => {
-  // Comprueba si el valor nuevo ya está en el formato que necesito
-  if (!esFechaEnFormatoISO(nuevoValor)) {
-    const fechaFormateada = formatDate(nuevoValor);
-    if (fechaFormateada !== nuevoValor) {
-      fecha.value = fechaFormateada;
+onMounted(() => {
+  fetchFormDataById(id.value).then(() => {
+    if (props.formulario.fecha) {
+      fecha.value = isoToLocalDateTime(props.formulario.fecha);
     }
-  }
+  });
 });
-
-function esFechaEnFormatoISO(fecha) {
-  const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
-  return regex.test(fecha);
-}
 
 const {
   currentTab,
