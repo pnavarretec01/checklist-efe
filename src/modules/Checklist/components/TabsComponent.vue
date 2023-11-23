@@ -57,7 +57,6 @@ const validatePK = (pk, minPK, maxPK) => {
   }
   return pk;
 }
-
 </script>
 <template>
   <VCard>

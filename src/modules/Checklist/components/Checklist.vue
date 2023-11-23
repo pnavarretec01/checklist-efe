@@ -66,8 +66,6 @@ function esFechaEnFormatoISO(fecha) {
   return regex.test(fecha);
 }
 
-
-
 const {
   currentTab,
   parentItems,
@@ -86,6 +84,30 @@ const {
 onMounted(() => {
   fetchFormDataById(id.value);
 });
+
+const validatePKRange = (pk, minPK, maxPK, pkType) => {
+  if (minPK !== undefined && pk < minPK) {
+    snackbarMessage.value = `El PK mínimo permitido para ${pkType} es ${minPK}`;
+    snackbar.value = true;
+    snackbarColor.value = "error"
+    return minPK;
+  } else if (maxPK !== undefined && pk > maxPK) {
+    snackbarMessage.value = `El PK máximo permitido para ${pkType} es ${maxPK}`;
+    snackbar.value = true;
+    snackbarColor.value = "error"
+    return maxPK;
+  }
+  return pk;
+};
+
+watch(pkInicio, (newVal) => {
+  pkInicio.value = validatePKRange(newVal, subseleccionado.value?.pk_inicio, subseleccionado.value?.pk_termino, "inicio");
+});
+
+watch(pkTermino, (newVal) => {
+  pkTermino.value = validatePKRange(newVal, subseleccionado.value?.pk_inicio, subseleccionado.value?.pk_termino, "término");
+});
+
 </script>
 <template>
   <div class="d-flex justify-end align-start gap-3 mb-4 mt-4 me-5">
