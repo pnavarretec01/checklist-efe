@@ -391,7 +391,6 @@ export default function useChecklist(
   // Obtiene el formulario por ID.
   const fetchFormDataById = async (id) => {
     try {
-      console.log(formulario);
       nombreSupervisor.value = formulario.nombre_supervisor;
       fecha.value = formulario.fecha;
       subdivision.value = formulario.subdivision;
