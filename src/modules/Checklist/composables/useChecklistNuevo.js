@@ -20,7 +20,7 @@ export default function useChecklist(
   const updateConnectionStatus = () => {
     isConnected.value = navigator.onLine;
     if (isConnected.value) {
-      syncOfflineData();
+      manualSync();
       snackbar.value = true;
       snackbarMessage.value = "Conexión a Internet Restaurada";
       snackbarColor.value = "success";

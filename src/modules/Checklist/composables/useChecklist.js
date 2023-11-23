@@ -42,7 +42,7 @@ export default function useChecklist(
       setTimeout(() => {
         syncButtonDisabled.value = false;
         syncButtonLabel.value = "Sincronizar";
-      }, 10000);
+      }, 5000);
     }
   };
 
@@ -87,7 +87,7 @@ export default function useChecklist(
       setTimeout(() => {
         syncButtonDisabled.value = false;
         syncButtonLabel.value = "Sincronizar";
-      }, 10000);
+      }, 5000);
     } else {
       snackbar.value = true;
       snackbarMessage.value = "Sin Conexión a Internet";
@@ -159,7 +159,7 @@ export default function useChecklist(
       setTimeout(() => {
         syncButtonDisabled.value = false;
         syncButtonLabel.value = "Sincronizar";
-      }, 10000);
+      }, 5000);
 
       await syncPendingItems();
       await syncEditedItems();
@@ -195,7 +195,7 @@ export default function useChecklist(
     setTimeout(() => {
       syncButtonDisabled.value = false;
       syncButtonLabel.value = "Sincronizar";
-    }, 10000);
+    }, 5000);
 
     if (online.value) {
       try {
@@ -391,6 +391,7 @@ export default function useChecklist(
   // Obtiene el formulario por ID.
   const fetchFormDataById = async (id) => {
     try {
+      console.log(formulario);
       nombreSupervisor.value = formulario.nombre_supervisor;
       fecha.value = formulario.fecha;
       subdivision.value = formulario.subdivision;

@@ -52,11 +52,20 @@ function formatDate(date) {
 }
 
 watch(fecha, (nuevoValor, oldValue) => {
-  const fechaFormateada = formatDate(nuevoValor);
-  if (fechaFormateada !== nuevoValor) {
-    fecha.value = fechaFormateada;
+  // Comprueba si el valor nuevo ya está en el formato que necesito
+  if (!esFechaEnFormatoISO(nuevoValor)) {
+    const fechaFormateada = formatDate(nuevoValor);
+    if (fechaFormateada !== nuevoValor) {
+      fecha.value = fechaFormateada;
+    }
   }
 });
+
+function esFechaEnFormatoISO(fecha) {
+  const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
+  return regex.test(fecha);
+}
+
 
 
 const {

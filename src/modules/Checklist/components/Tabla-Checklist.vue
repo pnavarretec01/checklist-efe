@@ -81,10 +81,8 @@ const computedItems = computed(() => {
   return items.value.slice(start, end);
 });
 
-
 const search = ref('');
 const loading = ref(false);
-
 
 watch(options, newVal => {
   if (newVal.itemsPerPage <= 0) {
