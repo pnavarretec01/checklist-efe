@@ -31,8 +31,8 @@ const subseleccionado = ref([]);
 watch(subseleccionado, (nuevoValor, oldName) => {
   if (nuevoValor.pk_inicio !== null || nuevoValor.pk_inicio !== undefined &&
     nuevoValor.pk_termino !== null || nuevoValor.pk_termino !== undefined) {
-    pkInicio.value = nuevoValor.pk_inicio
-    pkTermino.value = nuevoValor.pk_termino
+    // pkInicio.value = nuevoValor.pk_inicio
+    // pkTermino.value = nuevoValor.pk_termino
   }
 });
 
@@ -71,6 +71,7 @@ const {
 
 onMounted(() => {
   fetchFormDataById(id.value);
+  isDisabledPk.value = checkSubitemsData();
 });
 
 const validatePKRange = (pk, minPK, maxPK, pkType) => {
@@ -88,6 +89,10 @@ const validatePKRange = (pk, minPK, maxPK, pkType) => {
   return pk;
 };
 
+// watch(props.formulario, (newVal) => {
+//   fetchFormDataById(id.value);
+// });
+
 watch(pkInicio, (newVal) => {
   pkInicio.value = validatePKRange(newVal, subseleccionado.value?.pk_inicio, subseleccionado.value?.pk_termino, "inicio");
 });
@@ -95,6 +100,23 @@ watch(pkInicio, (newVal) => {
 watch(pkTermino, (newVal) => {
   pkTermino.value = validatePKRange(newVal, subseleccionado.value?.pk_inicio, subseleccionado.value?.pk_termino, "término");
 });
+
+const isDisabledPk = ref(false);
+
+const checkSubitemsData = () => {
+  for (let item of props.formulario.items) {
+    for (let subitem of item.subitems) {
+      if (subitem.data && subitem.data.length > 0) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+watch(() => props.formulario, () => {
+  isDisabledPk.value = checkSubitemsData();
+}, { deep: true });
 
 </script>
 <template>
@@ -122,17 +144,17 @@ watch(pkTermino, (newVal) => {
         <VCol cols="12" md="6">
           <v-autocomplete :items="subdivisions"
             :item-title="(item) => `${item.nombre}  (PKs: ${item.pk_inicio} - ${item.pk_termino})`" label="Subdivisión"
-            v-model="subseleccionado" return-object>
+            v-model="subseleccionado" return-object :disabled="isDisabledPk">
             <template v-slot:no-data>
               <div class="px-4">No existen datos</div>
             </template>
           </v-autocomplete>
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" />
+          <VTextField v-model="pkInicio" type="number" label="Pk Inicio" :disabled="isDisabledPk" />
         </VCol>
         <VCol cols="12" md="3" sm="4">
-          <VTextField v-model="pkTermino" type="number" label="Pk Término" />
+          <VTextField v-model="pkTermino" type="number" label="Pk Término" :disabled="isDisabledPk" />
         </VCol>
         <VCol cols="12">
           <VTextarea v-model="observacionGeneral" rows="3" label="Observación general" :readonly="cerrado"></VTextarea>
