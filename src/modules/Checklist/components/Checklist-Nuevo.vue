@@ -5,7 +5,9 @@ import useChecklist from '../composables/useChecklistNuevo'
 import TabsComponent from './TabsComponent.vue'
 import logoEfe from '../../../assets/images/logo-efe.svg'
 
-const nombreSupervisor = ref('Patricio Navarrete');
+const dataUser = JSON.parse(localStorage.getItem("userData"));
+
+const nombreSupervisor = ref('');
 const fecha = ref(formatDateTime(new Date()));
 const subdivision = ref('');
 const pkInicio = ref(null);
@@ -29,6 +31,8 @@ watch(subseleccionado, (nuevoValor, oldName) => {
     pkTermino.value = nuevoValor.pk_termino
   }
 });
+
+nombreSupervisor.value = dataUser.nombre 
 
 const {
   currentTab,

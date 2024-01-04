@@ -107,21 +107,16 @@ const isClosed = (value) => {
 
 function formatDate(date) {
   const d = new Date(date),
-    month = '' + (d.getMonth() + 1),
-    day = '' + d.getDate(),
+    month = ('0' + (d.getMonth() + 1)).slice(-2),
+    day = ('0' + d.getDate()).slice(-2),
     year = d.getFullYear(),
-    hh = d.getHours(),
-    mm = d.getMinutes(),
+    hh = ('0' + d.getHours()).slice(-2),
+    mm = ('0' + d.getMinutes()).slice(-2),
     ss = '00';
-
-  if (month.length < 2)
-    month = '0' + month;
-  if (day.length < 2)
-    day = '0' + day;
-
 
   return `${year}-${month}-${day} ${hh}:${mm}`;
 }
+
 const showDelete = ref(false)
 </script>
 
