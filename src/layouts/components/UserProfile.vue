@@ -1,19 +1,19 @@
 <script setup>
-import { getCurrentInstance } from "vue";
+const keycloak = inject('keycloak');
 import avatar1 from "@images/avatars/avatar-1.png";
 
 const dataUser = JSON.parse(localStorage.getItem("userData"));
-const instance = getCurrentInstance();
+const username = keycloak?.tokenParsed?.given_name || 'Invitado';
+const rol = keycloak?.tokenParsed?.realm_access?.roles[0] || "Checklist"
 
 async function logout() {
   try {
     localStorage.removeItem("userInfo");
     localStorage.removeItem("userData");
 
-    if (instance && instance.proxy.$keycloak) {
-      let logoutOptions = { redirectUri: window.location.origin };
-      await instance.proxy.$keycloak.logout(logoutOptions);
-    }
+    let logoutOptions = { redirectUri: window.location.origin };
+    await keycloak.logout(logoutOptions);
+
   } catch (error) {
     console.error(error);
   }
@@ -37,9 +37,9 @@ async function logout() {
               </VListItemAction>
             </template>
             <VListItemTitle class="font-weight-semibold">
-              {{ dataUser.nombre }}
+              {{ username }}
             </VListItemTitle>
-            <VListItemSubtitle>{{ dataUser.rol_usuario }}</VListItemSubtitle>
+            <VListItemSubtitle>{{ rol }}</VListItemSubtitle>
           </VListItem>
           <VDivider class="my-2" />
           <VListItem @click="logout">
