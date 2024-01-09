@@ -1,4 +1,4 @@
-//import { routeGuard } from '@/router/route-guard';
+import { routeGuard } from '@/router/route-guard';
 import { setupLayouts } from 'virtual:generated-layouts';
 import { createRouter, createWebHistory } from 'vue-router';
 import routes from '~pages';
@@ -10,7 +10,7 @@ const router = createRouter({
   ],
 })
 
-//router.beforeEach(routeGuard);
+router.beforeEach(routeGuard);
 
 
 // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards

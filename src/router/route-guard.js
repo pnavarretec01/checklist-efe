@@ -15,7 +15,8 @@ export async function cargaRutasPermitidas(token) {
       items.forEach((item) => {
         if (item.to) rutas.push(item.to);
         if (item.to == "checklist-page") {
-            rutas.push('checklist')
+          rutas.push("checklist");
+          rutas.push("checklist/*");
         }
         if (item.children) extraerRutas(item.children, rutas);
         if (item.pestanas) {
@@ -38,14 +39,20 @@ export async function cargaRutasPermitidas(token) {
 export function routeGuard(to, from, next) {
   const pathSinSlash = to.path.startsWith("/") ? to.path.slice(1) : to.path;
 
+  const basePathIsAllowed = rutasPermitidas.value.some((permittedPath) => {
+    if (permittedPath.endsWith("/*")) {
+      const basePermittedPath = permittedPath.replace("/*", "");
+      return pathSinSlash.startsWith(basePermittedPath);
+    }
+    // Chequea rutas exactas
+    return permittedPath === pathSinSlash;
+  });
+
   if (rutasCargando.value) {
     next(false);
-  } else if (
-    pathSinSlash === "" ||
-    rutasPermitidas.value.includes(pathSinSlash)
-  ) {
+  } else if (basePathIsAllowed) {
     next();
   } else {
-    next({ path: "/index" });
+    next({ path: "/error" });
   }
 }
