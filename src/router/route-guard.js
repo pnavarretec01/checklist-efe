@@ -14,6 +14,9 @@ export async function cargaRutasPermitidas(token) {
     const extraerRutas = (items, rutas = []) => {
       items.forEach((item) => {
         if (item.to) rutas.push(item.to);
+        if (item.to == "checklist-page") {
+            rutas.push('checklist')
+        }
         if (item.children) extraerRutas(item.children, rutas);
         if (item.pestanas) {
           item.pestanas.forEach((pestana) => {
