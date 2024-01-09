@@ -38,10 +38,10 @@ export async function cargaRutasPermitidas(token) {
 
 export function routeGuard(to, from, next) {
   if (to.name === "404") {
-    return next({ name: "home-page" });
+    return next({ name: "404" });
   }
-  if (to.name === "/") {
-    return next();
+  if (to.path === "/") {
+    return next({ name: "home-page" });
   }
   const pathSinSlash = to.path.startsWith("/") ? to.path.slice(1) : to.path;
 
