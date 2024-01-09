@@ -37,15 +37,17 @@ export async function cargaRutasPermitidas(token) {
 }
 
 export function routeGuard(to, from, next) {
+  if (to.name === "404") {
+    return next();
+  }
   const pathSinSlash = to.path.startsWith("/") ? to.path.slice(1) : to.path;
 
-  const basePathIsAllowed = rutasPermitidas.value.some((permittedPath) => {
-    if (permittedPath.endsWith("/*")) {
-      const basePermittedPath = permittedPath.replace("/*", "");
+  const basePathIsAllowed = rutasPermitidas.value.some((pathPermitido) => {
+    if (pathPermitido.endsWith("/*")) {
+      const basePermittedPath = pathPermitido.replace("/*", "");
       return pathSinSlash.startsWith(basePermittedPath);
     }
-    // Chequea rutas exactas
-    return permittedPath === pathSinSlash;
+    return pathPermitido === pathSinSlash;
   });
 
   if (rutasCargando.value) {
@@ -53,6 +55,6 @@ export function routeGuard(to, from, next) {
   } else if (basePathIsAllowed) {
     next();
   } else {
-    next({ path: "/error" });
+    return next({ name: "404" });
   }
 }

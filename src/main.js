@@ -81,11 +81,11 @@ async function initApp() {
   await cargaRutasPermitidas(keycloak.token);
 
   const app = createApp(App);
+  app.use(layoutsPlugin);
 
   app.use(vuetify);
   app.use(createPinia());
   app.use(router);
-  app.use(layoutsPlugin);
 
   app.provide("keycloak", keycloak);
 
