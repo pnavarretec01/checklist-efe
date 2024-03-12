@@ -157,16 +157,28 @@ const limpiarFiltro = () => {
       <VCol cols="12" md="4">
         <VTextField v-model="fechaHasta" label="Fecha Hasta" type="date" outlined dense />
       </VCol>
-      <VCol cols="12" md="2">
-        <VBtn prepend-icon="tabler-search" @click="filtrarPorFechas">
+      <VCol cols="12" md="4">
+        <div class="d-flex flex-column flex-md-row gap-3">
+          <div>
+            <VBtn prepend-icon="tabler-search" @click="filtrarPorFechas">
+              Filtrar
+            </VBtn>
+          </div>
+          <div>
+            <VBtn prepend-icon="mdi-filter-remove" @click="limpiarFiltro">
+              Limpiar filtro
+            </VBtn>
+          </div>
+        </div>
+        <!-- <VBtn prepend-icon="tabler-search" @click="filtrarPorFechas">
           Filtrar
-        </VBtn>
+        </VBtn> -->
       </VCol>
-      <VCol cols="12" md="2">
+      <!-- <VCol cols="12" md="2">
         <VBtn prepend-icon="mdi-filter-remove" @click="limpiarFiltro">
           Limpiar filtro
         </VBtn>
-      </VCol>
+      </VCol> -->
     </VRow>
 
     <VRow>
