@@ -1,15 +1,18 @@
-
 <script setup>
-import { VDataTable } from 'vuetify/labs/VDataTable'
-import useChecklist from '../composables/useChecklist'
-import useChecklistNuevo from '../composables/useChecklistNuevo'
+import { useRouter } from 'vue-router';
+import { VDataTable } from 'vuetify/labs/VDataTable';
+import useChecklist from '../composables/useChecklist';
+import useChecklistNuevo from '../composables/useChecklistNuevo';
 import useExportData from '../composables/useExportData';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog.vue';
-import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const showDialog = ref(false);
 const itemToDelete = ref({});
+
+const fechaDesde = ref('');
+const fechaHasta = ref('');
+
 
 const handleDelete = (item) => {
   deleteData(item.value.pk_formulario_id);
@@ -35,7 +38,8 @@ const {
   snackbarColor: snackbarColor1,
   syncButtonDisabled,
   syncButtonLabel,
-  sincronizarFunc
+  sincronizarFunc,
+  applyFilter
 } = useChecklist();
 
 const {
@@ -44,11 +48,6 @@ const {
   snackbarMessage: snackbarMessage2,
   snackbarColor: snackbarColor2,
 } = useChecklistNuevo();
-
-const sincronizar = () => {
-  manualSync()
-  //fetchItems()
-}
 
 onMounted(() => {
   fetchItems()
@@ -118,6 +117,16 @@ function formatDate(date) {
 }
 
 const showDelete = ref(false)
+
+const filtrarPorFechas = () => {
+  applyFilter({ fechaDesde: fechaDesde.value, fechaHasta: fechaHasta.value });
+};
+const limpiarFiltro = () => {
+  fechaDesde.value = '';
+  fechaHasta.value = '';
+  fetchItems();
+};
+
 </script>
 
 <template>
@@ -141,6 +150,24 @@ const showDelete = ref(false)
         </div>
       </div>
     </div>
+    <VRow>
+      <VCol cols="12" md="4">
+        <VTextField v-model="fechaDesde" label="Fecha Desde" type="date" outlined dense />
+      </VCol>
+      <VCol cols="12" md="4">
+        <VTextField v-model="fechaHasta" label="Fecha Hasta" type="date" outlined dense />
+      </VCol>
+      <VCol cols="12" md="2">
+        <VBtn prepend-icon="tabler-search" @click="filtrarPorFechas">
+          Filtrar
+        </VBtn>
+      </VCol>
+      <VCol cols="12" md="2">
+        <VBtn prepend-icon="mdi-filter-remove" @click="limpiarFiltro">
+          Limpiar filtro
+        </VBtn>
+      </VCol>
+    </VRow>
 
     <VRow>
       <VCol cols="12" offset-md="8" md="4">
@@ -235,4 +262,3 @@ const showDelete = ref(false)
   background-color: orange;
 }
 </style>
-

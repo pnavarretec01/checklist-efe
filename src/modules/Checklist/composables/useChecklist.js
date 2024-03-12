@@ -13,7 +13,8 @@ export default function useChecklist(
   observacionGeneral,
   itemId,
   formulario,
-  subseleccionado
+  subseleccionado,
+  fechaDesde
 ) {
   const isConnected = ref(navigator.onLine);
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function useChecklist(
   const snackbarColor = ref("info");
   const online = ref(navigator.onLine);
   const subdivisions = ref([]);
+  const allItems = ref([]);
 
   const syncButtonDisabled = ref(false);
   const syncButtonLabel = ref("Sincronizar");
@@ -152,7 +154,7 @@ export default function useChecklist(
     return JSON.parse(localStorage.getItem("checklist_datatabla") || "[]");
   };
 
-  const fetchItems = async () => {
+  const fetchItems = async (params) => {
     if (online.value) {
       syncButtonDisabled.value = true;
       syncButtonLabel.value = "Sincronizando";
@@ -166,10 +168,11 @@ export default function useChecklist(
       await syncDeletedItems();
       try {
         const response = await axios.get(apiURL + "formularios");
-        items.value = response.data.map((item) => ({
+        allItems.value = response.data.map((item) => ({
           ...item,
           needsSync: false,
         }));
+        items.value = [...allItems.value];
         storeItemsInLocalStorage(items.value);
         snackbar.value = true;
         snackbarMessage.value = "Datos cargados con éxito!";
@@ -182,7 +185,9 @@ export default function useChecklist(
         snackbarColor.value = "error";
       }
     } else {
-      items.value = getItemsFromLocalStorage();
+      const storedItems = getItemsFromLocalStorage();
+      allItems.value = storedItems;
+      items.value = [...storedItems];
       snackbar.value = true;
       snackbarMessage.value =
         "Estás offline. Cargando datos desde el almacenamiento local";
@@ -890,6 +895,28 @@ export default function useChecklist(
     );
   };
 
+  const applyFilter = (params) => {
+    if (params.fechaDesde || params.fechaHasta) {
+      // Convierte las fechas desde y hasta en objetos Date en UTC
+      const startDate = params.fechaDesde
+        ? new Date(params.fechaDesde + "T00:00:00Z")
+        : new Date(0);
+      const endDate = params.fechaHasta
+        ? new Date(params.fechaHasta + "T23:59:59Z")
+        : new Date();
+
+      items.value = allItems.value.filter((item) => {
+        // Asume que item.fecha ya está en UTC y crea un objeto Date directamente
+        const itemDate = new Date(item.fecha);
+
+        // La comparación se hace directamente sin convertir itemDate, porque ya está en UTC
+        return itemDate >= startDate && itemDate <= endDate;
+      });
+    } else {
+      items.value = [...allItems.value]; // Si no hay fechas, muestra todos los datos nuevamente
+    }
+  };
+
   return {
     items,
     fetchItems,
@@ -912,5 +939,6 @@ export default function useChecklist(
     syncButtonDisabled,
     syncButtonLabel,
     sincronizarFunc,
+    applyFilter,
   };
 }
