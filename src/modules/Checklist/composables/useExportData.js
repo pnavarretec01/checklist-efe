@@ -51,7 +51,7 @@ export default function useExportData() {
 
   function transformDataForCSV(data) {
     const rows = [];
-    
+
     data.items.forEach((item) => {
       item.subitems.forEach((subitem) => {
         subitem.data.forEach((d) => {
@@ -77,15 +77,76 @@ export default function useExportData() {
         });
       });
     });
-  
+
     return rows;
   }
-  
+
+  function transformAllForms(formulario) {
+    const formattedDate = new Date(formulario.fecha).toLocaleString("es-CL", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }); // formatea fecha a formato CL
+    const rows = [];
+    let generalDetailsAdded = false;
+
+    formulario.items.forEach((item) => {
+      item.subitems.forEach((subitem) => {
+        let detailsAdded = false;
+
+        subitem.data.forEach((data) => {
+          if (data.pk || data.collera || data.observacion) {
+            rows.push({
+              "PK Formulario ID": formulario.pk_formulario_id,
+              "Nombre Supervisor": formulario.nombre_supervisor,
+              Fecha: formattedDate,
+              "Subdivision Nombre": formulario.subdivision.nombre,
+              "Observacion General": formulario.observacion_general,
+              "PK Inicio": formulario.pk_inicio,
+              "PK Termino": formulario.pk_termino,
+              Cerrado: formulario.cerrado ? "Sí" : "No",
+              Item: item.nombre,
+              Subitem: subitem.nombre,
+              PK: data.pk,
+              Collera: data.collera,
+              Observación: data.observacion,
+            });
+            detailsAdded = true;
+            generalDetailsAdded = true;
+          }
+        });
+
+        if (!detailsAdded) {
+          // sin detalles, por ahor no hace nada
+        }
+      });
+    });
+
+    if (!generalDetailsAdded) {
+      rows.push({
+        "PK Formulario ID": formulario.pk_formulario_id,
+        "Nombre Supervisor": formulario.nombre_supervisor,
+        Fecha: formattedDate,
+        "Subdivision Nombre": formulario.subdivision.nombre,
+        "Observacion General": formulario.observacion_general,
+        "PK Inicio": formulario.pk_inicio,
+        "PK Termino": formulario.pk_termino,
+        Cerrado: formulario.cerrado ? "Sí" : "No",
+        Item: "",
+        Subitem: "",
+        PK: "",
+        Collera: "",
+        Observación: "",
+      });
+    }
+    return rows;
+  }
 
   const exportAllData = (allItems, format) => {
-    const dataToExport = allItems
-      .map((item) => transformDataForCSV(item))
-      .flat();
+    const dataToExport = allItems.map((item) => transformAllForms(item)).flat();
 
     if (format === "csv") {
       const csv = Papa.unparse(dataToExport);
@@ -97,7 +158,7 @@ export default function useExportData() {
       link.click();
       document.body.removeChild(link);
     } else if (format === "xlsx") {
-      exportToXLSX(dataToExport, `Checklists_todos_`);
+      exportToXLSX(dataToExport, `Checklists_todos`);
     }
   };
 
