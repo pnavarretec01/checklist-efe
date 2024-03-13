@@ -51,35 +51,59 @@ export default function useExportData() {
 
   function transformDataForCSV(data) {
     const rows = [];
+    let hasRelevantSubitems = false; // Bandera para verificar si algún subitem cumple con la condición
 
-    data.items.forEach((item) => {
-      item.subitems.forEach((subitem) => {
-        subitem.data.forEach((d) => {
-          if (d.pk || d.collera || d.observacion) {
-            const row = {
-              "PK Formulario ID": data.pk_formulario_id,
-              "Nombre Supervisor": data.nombre_supervisor,
-              Fecha: data.fecha,
-              // "Subdivision ID": data.subdivision.pk_subdivision_id,
-              "Subdivision Nombre": data.subdivision.nombre,
-              "Observacion General": data.observacion_general,
-              "PK Inicio": data.pk_inicio,
-              "PK Termino": data.pk_termino,
-              Cerrado: data.cerrado ? "Sí" : "No",
-              Item: item.nombre,
-              Subitem: subitem.nombre,
-              PK: d.pk,
-              Collera: d.collera,
-              Observación: d.observacion,
-            };
-            rows.push(row);
-          }
+    data.items.forEach(item => {
+        item.subitems.forEach(subitem => {
+            subitem.data.forEach(d => {
+                // Verificar si el subitem tiene datos relevantes
+                if (d.pk || d.collera || d.observacion) {
+                    hasRelevantSubitems = true; // Marcar que hay al menos un subitem relevante
+                    const row = {
+                        "PK Formulario ID": data.pk_formulario_id,
+                        "Nombre Supervisor": data.nombre_supervisor,
+                        Fecha: data.fecha,
+                        "Subdivision Nombre": data.subdivision.nombre,
+                        "Observacion General": data.observacion_general,
+                        "PK Inicio": data.pk_inicio,
+                        "PK Termino": data.pk_termino,
+                        Cerrado: data.cerrado ? "Sí" : "No",
+                        Item: item.nombre,
+                        Subitem: subitem.nombre,
+                        PK: d.pk,
+                        Collera: d.collera,
+                        Observación: d.observacion,
+                    };
+                    rows.push(row);
+                }
+            });
         });
-      });
     });
 
+    // Si después de revisar todos los subitems, no se encontró ninguno relevante,
+    // añade una fila con los datos generales del formulario sin detalles de items/subitems.
+    if (!hasRelevantSubitems) {
+        rows.push({
+            "PK Formulario ID": data.pk_formulario_id,
+            "Nombre Supervisor": data.nombre_supervisor,
+            Fecha: data.fecha,
+            "Subdivision Nombre": data.subdivision.nombre,
+            "Observacion General": data.observacion_general,
+            "PK Inicio": data.pk_inicio,
+            "PK Termino": data.pk_termino,
+            Cerrado: data.cerrado ? "Sí" : "No",
+            // Los siguientes campos se dejan vacíos porque no hay subitems relevantes
+            Item: "",
+            Subitem: "",
+            PK: "",
+            Collera: "",
+            Observación: "",
+        });
+    }
+
     return rows;
-  }
+}
+
 
   function transformAllForms(formulario) {
     const formattedDate = new Date(formulario.fecha).toLocaleString("es-CL", {
